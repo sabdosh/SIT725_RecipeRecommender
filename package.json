@@ -1,0 +1,23 @@
+{
+  "name": "sit725_reciperecommender",
+  "version": "1.0.0",
+  "description": "",
+  "homepage": "https://github.com/sabdosh/SIT725_RecipeRecommender#readme",
+  "bugs": {
+    "url": "https://github.com/sabdosh/SIT725_RecipeRecommender/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/sabdosh/SIT725_RecipeRecommender.git"
+  },
+  "license": "ISC",
+  "author": "",
+  "type": "commonjs",
+  "main": "index.js",
+  "directories": {
+    "test": "tests"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  }
+}
