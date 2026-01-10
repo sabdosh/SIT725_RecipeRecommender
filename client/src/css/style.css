@@ -1,0 +1,132 @@
+:root {
+  --bg: #ffffff;
+  --card: #ffffff;
+  --border: #d7dce3;
+  --text: #1a1f2b;
+  --muted: #5b667a;
+  --primary: #1f5fff;
+  --primaryHover: #1749c7;
+  --errorBg: #fde8e8;
+  --errorText: #9b1c1c;
+  --successBg: #e7f6ec;
+  --successText: #046c4e;
+  --shadow: 0 10px 30px rgba(16, 24, 40, 0.08);
+}
+
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+  color: var(--text);
+  background: var(--bg);
+}
+
+.page {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+}
+
+.card {
+  width: 100%;
+  max-width: 520px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  box-shadow: var(--shadow);
+  padding: 28px;
+}
+
+.card__header {
+  text-align: center;
+  margin-bottom: 18px;
+}
+
+.title {
+  margin: 0;
+  font-size: 38px;
+  font-weight: 700;
+}
+
+.subtitle {
+  margin: 8px 0 0;
+  color: var(--muted);
+  font-size: 14px;
+}
+
+.form {
+  display: grid;
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.label {
+  font-size: 13px;
+  color: var(--text);
+  margin-top: 6px;
+}
+
+.input {
+  height: 44px;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  outline: none;
+  font-size: 14px;
+}
+
+.input:focus {
+  border-color: rgba(31, 95, 255, 0.6);
+  box-shadow: 0 0 0 3px rgba(31, 95, 255, 0.15);
+}
+
+.button {
+  margin-top: 10px;
+  height: 44px;
+  border: none;
+  border-radius: 6px;
+  background: var(--primary);
+  color: white;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.button:hover { background: var(--primaryHover); }
+.button:disabled { opacity: 0.7; cursor: not-allowed; }
+
+.footerText {
+  margin: 16px 0 0;
+  text-align: center;
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.link {
+  color: var(--primary);
+  text-decoration: none;
+  font-weight: 600;
+}
+.link:hover { text-decoration: underline; }
+
+.statusMount { min-height: 0; }
+
+.banner {
+  border-radius: 6px;
+  padding: 10px 12px;
+  margin: 10px 0 0;
+  font-size: 13px;
+  border: 1px solid transparent;
+}
+
+.banner--error {
+  background: var(--errorBg);
+  color: var(--errorText);
+  border-color: rgba(155, 28, 28, 0.25);
+}
+
+.banner--success {
+  background: var(--successBg);
+  color: var(--successText);
+  border-color: rgba(4, 108, 78, 0.25);
+}

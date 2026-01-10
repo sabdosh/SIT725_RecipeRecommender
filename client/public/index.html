@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Recipe AI - Login</title>
+    <link rel="stylesheet" href="../src/css/style.css" />
+  </head>
+
+  <body>
+    <main class="page">
+      <section class="card" aria-label="Login">
+        <header class="card__header">
+          <h1 class="title">Recipe AI</h1>
+          <p class="subtitle">Smart recipe recommendations</p>
+        </header>
+
+        <div id="statusMount" class="statusMount" aria-live="polite"></div>
+
+        <form id="loginForm" class="form" novalidate>
+          <label class="label" for="username">Username</label>
+          <input
+            id="username"
+            name="username"
+            class="input"
+            type="text"
+            autocomplete="username"
+            placeholder="Enter username"
+            required
+          />
+
+          <label class="label" for="password">Password</label>
+          <input
+            id="password"
+            name="password"
+            class="input"
+            type="password"
+            autocomplete="current-password"
+            placeholder="Enter password"
+            required
+          />
+
+          <button id="loginBtn" class="button" type="submit">Log In</button>
+        </form>
+
+        <p class="footerText">
+          Don't have an account?
+          <a class="link" href="#" id="registerLink">Register</a>
+        </p>
+      </section>
+    </main>
+
+    <script type="module" src="../src/js/main.js"></script>
+  </body>
+</html>
