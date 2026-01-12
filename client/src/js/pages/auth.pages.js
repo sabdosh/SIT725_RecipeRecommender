@@ -1,4 +1,4 @@
-import { login } from "../api/auth.api.js";
+import { login, register } from "../api/auth.api.js";
 import { mountStatusBanner, setBanner } from "../components/statusBanner.js";
 
 export function mountAuthPage() {
@@ -10,16 +10,38 @@ export function mountAuthPage() {
   const statusMount = document.getElementById("statusMount");
 
   if (!form || !usernameInput || !passwordInput || !loginBtn || !statusMount) {
-    // Fail fast if markup changed
     console.error("Auth page: required elements missing");
     return;
   }
 
   mountStatusBanner(statusMount);
 
-  registerLink?.addEventListener("click", (e) => {
+  registerLink.addEventListener("click", async (e) => {
     e.preventDefault();
-    setBanner({ type: "error", message: "Register page not implemented (minimal scope)." });
+
+    const username = usernameInput.value.trim();
+    const password = passwordInput.value;
+
+    if (!username || !password) {
+      setBanner({ type: "error", message: "Enter a username and password first." });
+      return;
+    }
+
+    setLoading(true);
+    setBanner(null);
+
+    try {
+      const result = await register({ username, password });
+      if (result?.token) {
+        localStorage.setItem("auth_token", result.token);
+        setBanner({ type: "success", message: "Registered successfully. Redirecting..." });
+        window.location.href = "/dashboard";
+      }
+    } catch (err) {
+      setBanner({ type: "error", message: err.message });
+    } finally {
+      setLoading(false);
+    }
   });
 
   form.addEventListener("submit", async (e) => {
@@ -28,7 +50,6 @@ export function mountAuthPage() {
     const username = usernameInput.value.trim();
     const password = passwordInput.value;
 
-    // Minimal validation
     if (!username || !password) {
       setBanner({ type: "error", message: "Please enter both username and password." });
       return;
@@ -39,21 +60,13 @@ export function mountAuthPage() {
 
     try {
       const result = await login({ username, password });
-
-      // Success contract: token exists
       if (result?.token) {
         localStorage.setItem("auth_token", result.token);
         setBanner({ type: "success", message: "Login successful. Redirecting..." });
-
-        // Minimal navigation (replace with your real next page route)
-        window.location.href = "/client/public/next.html";
-        return;
+        window.location.href = "/dashboard";
       }
-
-      // If server returns 200 but no token, treat as error (reliable behaviour)
-      setBanner({ type: "error", message: "Login failed: missing token." });
     } catch (err) {
-      setBanner({ type: "error", message: err.message || "Login failed." });
+      setBanner({ type: "error", message: err.message });
     } finally {
       setLoading(false);
     }
@@ -61,7 +74,7 @@ export function mountAuthPage() {
 
   function setLoading(isLoading) {
     loginBtn.disabled = isLoading;
-    loginBtn.textContent = isLoading ? "Logging in..." : "Log In";
+    loginBtn.textContent = isLoading ? "Loading..." : "Log In";
     usernameInput.disabled = isLoading;
     passwordInput.disabled = isLoading;
   }
