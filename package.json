@@ -23,5 +23,9 @@
   "devDependencies": {
     "chai": "^4.5.0",
     "mocha": "^11.7.5"
+  },
+  "dependencies": {
+    "bcrypt": "^6.0.0",
+    "mongoose": "^9.1.3"
   }
 }
