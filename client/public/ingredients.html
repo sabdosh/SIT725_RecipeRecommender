@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Recipe AI - Ingredients</title>
+    <link rel="stylesheet" href="/src/css/style.css" />
+  </head>
+
+  <body>
+    <header class="topbar" aria-label="Top navigation">
+      <div class="topbar__inner">
+        <div class="brand">Recipe AI</div>
+        <nav class="topbar__nav">
+          <a class="topbar__link" href="#" aria-label="Saved recipes">Saved Recipes</a>
+          <a class="topbar__link" href="#" aria-label="Log out">Log Out</a>
+        </nav>
+      </div>
+    </header>
+
+    <main class="page page--top">
+      <section class="card card--wide" aria-label="Ingredients">
+        <header class="card__header card__header--left">
+          <h1 class="title title--h2">What ingredients do you have?</h1>
+          <p class="subtitle">Enter ingredients separated by commas</p>
+        </header>
+
+        <div id="statusMount" class="statusMount" aria-live="polite"></div>
+
+        <form id="ingredientsForm" class="form" novalidate>
+          <label class="label" for="ingredientsInput">Ingredients</label>
+          <textarea
+            id="ingredientsInput"
+            name="ingredients"
+            class="textarea"
+            rows="6"
+            placeholder="e.g., chicken, rice, tomatoes, garlic"
+            required
+          ></textarea>
+
+          <div class="quickAdd" aria-label="Quick add ingredients">
+            <div class="quickAdd__label">Quick add:</div>
+            <div class="chips">
+              <button class="chip" type="button" data-quick-add="Chicken">+ Chicken</button>
+              <button class="chip" type="button" data-quick-add="Rice">+ Rice</button>
+              <button class="chip" type="button" data-quick-add="Tomatoes">+ Tomatoes</button>
+              <button class="chip" type="button" data-quick-add="Pasta">+ Pasta</button>
+              <button class="chip" type="button" data-quick-add="Eggs">+ Eggs</button>
+              <button class="chip" type="button" data-quick-add="Cheese">+ Cheese</button>
+              <button class="chip" type="button" data-quick-add="Onions">+ Onions</button>
+              <button class="chip" type="button" data-quick-add="Garlic">+ Garlic</button>
+            </div>
+          </div>
+
+          <button id="getRecipesBtn" class="button button--wide" type="submit">
+            Get Recipes
+          </button>
+        </form>
+
+        <!-- Optional MVP results mount -->
+        <pre id="results" class="results" hidden></pre>
+      </section>
+    </main>
+
+    <script type="module" src="/src/js/main.js"></script>
+  </body>
+</html>
