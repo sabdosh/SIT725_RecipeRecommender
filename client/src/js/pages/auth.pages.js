@@ -35,7 +35,7 @@ export function mountAuthPage() {
       if (result?.token) {
         localStorage.setItem("auth_token", result.token);
         setBanner({ type: "success", message: "Registered successfully. Redirecting..." });
-        window.location.href = "/dashboard";
+        window.location.href = "/ingredients.html";
       }
     } catch (err) {
       setBanner({ type: "error", message: err.message });
@@ -63,7 +63,7 @@ export function mountAuthPage() {
       if (result?.token) {
         localStorage.setItem("auth_token", result.token);
         setBanner({ type: "success", message: "Login successful. Redirecting..." });
-        window.location.href = "/dashboard";
+        window.location.href = "/ingredients.html";
       }
     } catch (err) {
       setBanner({ type: "error", message: err.message });

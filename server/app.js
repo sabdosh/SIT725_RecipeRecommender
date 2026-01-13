@@ -13,12 +13,23 @@ app.use(express.json());
 connectDB();
 
 // serve client
-const clientPath = path.join(__dirname, "..", "client");
-app.use(express.static(clientPath));
+const publicPath = path.join(__dirname, "..", "client", "public");
+const srcPath = path.join(__dirname, "..", "client", "src");
+
+// Serve public files (html, images, etc.)
+app.use(express.static(publicPath));
+
+// Serve src assets at /src (css/js)
+app.use("/src", express.static(srcPath));
 
 app.get("/", (req, res) => {
-  return res.sendFile(path.join(clientPath, "public", "index.html"));
+  return res.sendFile(path.join(publicPath, "index.html"));
 });
+
+app.get("/ingredients", (req, res) => {
+  return res.sendFile(path.join(publicPath, "ingredients.html"));
+});
+
 
 /**
  * REGISTER - create account
@@ -63,10 +74,6 @@ app.post("/api/auth/login", async (req, res) => {
   } catch (err) {
     return res.status(500).json({ message: "Server error" });
   }
-});
-
-app.get("/dashboard", (req, res) => {
-  return res.sendFile(path.join(clientPath, "public", "dashboard.html"));
 });
 
 module.exports = app;

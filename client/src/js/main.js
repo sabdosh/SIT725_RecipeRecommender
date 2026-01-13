@@ -13,11 +13,23 @@ async function handleLogin(username, password) {
   const data = await res.json();
 
   if (data.token) {
-    window.location.href = "/dashboard";
+    window.location.href = "/ingredients.html";
   } else {
     alert(data.message);
   }
 }
 
-// expose function globally for your login form
 window.handleLogin = handleLogin;
+
+document.querySelectorAll("[data-quick-add]").forEach((btn) => {
+  btn.addEventListener("click", () => {
+    const value = btn.getAttribute("data-quick-add");
+    const textarea = document.querySelector("#ingredientsInput");
+    if (!textarea) return;
+
+    const current = textarea.value.trim();
+    textarea.value = current ? `${current}, ${value}` : value;
+    textarea.focus();
+  });
+});
+
