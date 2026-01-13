@@ -1,3 +1,5 @@
+console.log("✅ app.js loaded");
+
 const express = require("express");
 const path = require("path");
 const bcrypt = require("bcrypt");
@@ -8,6 +10,12 @@ const User = require("./models/user");
 const app = express();
 
 app.use(express.json());
+
+const geminiRoutes = require("./routes/gemini.routes");
+
+app.use("/api/gemini", geminiRoutes);
+
+app.get("/api/gemini/health", (req, res) => res.json({ ok: true }));
 
 // connect mongo
 connectDB();

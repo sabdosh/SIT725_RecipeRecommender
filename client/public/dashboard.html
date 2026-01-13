@@ -1,13 +1,50 @@
-<!DOCTYPE html>
-<html>
-  <head>
-    <meta charset="UTF-8" />
-    <title>Dashboard</title>
-  </head>
-  <body>
-    <h1>Welcome to Dashboard</h1>
-    <p>This is a dummy next page.</p>
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dashboard - Recipe Suggestions</title>
+  <link rel="stylesheet" href="/src/css/style.css" />
+</head>
+<body>
+  <main style="max-width: 980px; margin: 0 auto; padding: 24px;">
+    <h1>Recipe Dashboard</h1>
+    <p>Enter ingredients you have, and I’ll suggest recipes using Gemini.</p>
 
-    <a href="/">Back to Login</a>
-  </body>
+    <section style="margin-top: 16px; padding: 16px; border: 1px solid #ddd; border-radius: 10px;">
+      <form id="recipeForm">
+        <label for="ingredients" style="display:block; font-weight:600; margin-bottom:6px;">
+          Ingredients (comma-separated or one per line)
+        </label>
+
+        <textarea
+          id="ingredients"
+          rows="5"
+          placeholder="e.g. chicken, rice, garlic, spinach"
+          style="width:100%; padding:10px; border-radius:8px; border:1px solid #ccc;"
+          required
+        ></textarea>
+
+        <button
+          id="submitBtn"
+          type="submit"
+          style="margin-top:14px; padding:10px 14px; border-radius:10px; border:0; cursor:pointer;"
+        >
+          Get recipe suggestions
+        </button>
+
+        <div id="status" style="margin-top:10px;"></div>
+      </form>
+    </section>
+
+    <section style="margin-top: 18px;">
+      <h2>Suggestions</h2>
+      <div id="results" style="display:grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 12px; margin-top: 12px;"></div>
+      <pre id="raw" style="display:none; white-space: pre-wrap; margin-top: 12px; padding: 12px; border-radius: 10px; border: 1px solid #ddd;"></pre>
+    </section>
+  </main>
+
+  <!-- ✅ IMPORTANT: since client/ is served statically, this path works -->
+  <script src="/public/dashboard-logic.js?v=2"></script>
+</body>
 </html>
