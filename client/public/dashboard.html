@@ -1,50 +1,112 @@
 <!doctype html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Dashboard - Recipe Suggestions</title>
-  <link rel="stylesheet" href="/src/css/style.css" />
-</head>
-<body>
-  <main style="max-width: 980px; margin: 0 auto; padding: 24px;">
-    <h1>Recipe Dashboard</h1>
-    <p>Enter ingredients you have, and I’ll suggest recipes using Gemini.</p>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Recipe AI - Dashboard</title>
+    <link rel="stylesheet" href="/src/css/style.css" />
+  </head>
 
-    <section style="margin-top: 16px; padding: 16px; border: 1px solid #ddd; border-radius: 10px;">
-      <form id="recipeForm">
-        <label for="ingredients" style="display:block; font-weight:600; margin-bottom:6px;">
-          Ingredients (comma-separated or one per line)
-        </label>
+  <body>
+    <header class="topbar" aria-label="Top navigation">
+      <div class="topbar__inner">
+        <div class="brand">Recipe AI</div>
+        <nav class="topbar__nav">
+          <a class="topbar__link" href="#" aria-label="Saved recipes">Saved Recipes</a>
+          <a class="topbar__link" href="#" aria-label="Log out">Log Out</a>
+        </nav>
+      </div>
+    </header>
 
-        <textarea
-          id="ingredients"
-          rows="5"
-          placeholder="e.g. chicken, rice, garlic, spinach"
-          style="width:100%; padding:10px; border-radius:8px; border:1px solid #ccc;"
-          required
-        ></textarea>
+    <main class="page page--top">
+      <section class="card card--wide" aria-label="Recipe Suggestions">
+        <header class="card__header card__header--left">
+          <h1 class="title title--h2">Recipe Dashboard</h1>
+          <p class="subtitle">Enter ingredients you have, and I'll suggest recipes using Gemini</p>
+        </header>
 
-        <button
-          id="submitBtn"
-          type="submit"
-          style="margin-top:14px; padding:10px 14px; border-radius:10px; border:0; cursor:pointer;"
-        >
-          Get recipe suggestions
-        </button>
+        <form id="recipeForm" class="form" novalidate>
+          <label class="label" for="ingredients">
+            Ingredients (comma-separated or one per line)
+          </label>
+          <textarea
+            id="ingredients"
+            name="ingredients"
+            class="textarea"
+            rows="6"
+            placeholder="e.g., chicken, rice, garlic, spinach"
+            required
+          ></textarea>
 
-        <div id="status" style="margin-top:10px;"></div>
-      </form>
-    </section>
+          <div class="quickAdd" aria-label="Quick add ingredients">
+            <div class="quickAdd__label">Quick add:</div>
+            <div class="chips">
+              <button class="chip" type="button" data-quick-add="Chicken">+ Chicken</button>
+              <button class="chip" type="button" data-quick-add="Rice">+ Rice</button>
+              <button class="chip" type="button" data-quick-add="Tomatoes">+ Tomatoes</button>
+              <button class="chip" type="button" data-quick-add="Pasta">+ Pasta</button>
+              <button class="chip" type="button" data-quick-add="Eggs">+ Eggs</button>
+              <button class="chip" type="button" data-quick-add="Cheese">+ Cheese</button>
+              <button class="chip" type="button" data-quick-add="Onions">+ Onions</button>
+              <button class="chip" type="button" data-quick-add="Garlic">+ Garlic</button>
+            </div>
+          </div>
 
-    <section style="margin-top: 18px;">
-      <h2>Suggestions</h2>
-      <div id="results" style="display:grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 12px; margin-top: 12px;"></div>
-      <pre id="raw" style="display:none; white-space: pre-wrap; margin-top: 12px; padding: 12px; border-radius: 10px; border: 1px solid #ddd;"></pre>
-    </section>
-  </main>
+          <button id="submitBtn" class="button button--wide" type="submit">
+            Get Recipe Suggestions
+          </button>
 
-  <!-- ✅ IMPORTANT: since client/ is served statically, this path works -->
-  <script src="/public/dashboard-logic.js?v=2"></script>
-</body>
+          <!-- Test buttons added directly to HTML -->
+          <div class="test-buttons" style="margin: 10px 0; display: flex; gap: 10px; flex-wrap: wrap;">
+            <button id="enableMockBtn" type="button" style="padding: 8px 16px; background-color: #4CAF50; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 14px;">
+              Enable Mock Mode
+            </button>
+            <button id="testDataBtn" type="button" style="padding: 8px 16px; background-color: #2196F3; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 14px;">
+              Test with Sample Data
+            </button>
+          </div>
+
+          <div id="status" class="statusMount" aria-live="polite" style="margin-top: 10px;"></div>
+        </form>
+
+        <section class="results-section" style="margin-top: 32px;">
+          <h2 class="title title--h3">Suggestions</h2>
+          <div id="results" class="recipe-grid"></div>
+          <pre id="raw" style="display:none; white-space: pre-wrap; margin-top: 12px; padding: 12px; border-radius: 10px; border: 1px solid #ddd;"></pre>
+        </section>
+      </section>
+    </main>
+
+    <!-- ✅ IMPORTANT: since client/ is served statically, this path works -->
+    <script src="/public/dashboard-logic.js?v=2"></script>
+    
+    <!-- Add quick-add functionality -->
+    <script>
+      document.addEventListener('DOMContentLoaded', function() {
+        const ingredientsInput = document.getElementById('ingredients');
+        const quickAddButtons = document.querySelectorAll('.chip[data-quick-add]');
+        
+        quickAddButtons.forEach(button => {
+          button.addEventListener('click', function() {
+            const ingredient = this.getAttribute('data-quick-add');
+            const currentValue = ingredientsInput.value.trim();
+            
+            if (currentValue) {
+              // Add comma if not ending with one
+              if (!currentValue.endsWith(',') && !currentValue.endsWith('\n')) {
+                ingredientsInput.value = currentValue + ', ' + ingredient;
+              } else {
+                ingredientsInput.value = currentValue + ' ' + ingredient;
+              }
+            } else {
+              ingredientsInput.value = ingredient;
+            }
+            
+            // Focus back on textarea
+            ingredientsInput.focus();
+          });
+        });
+      });
+    </script>
+  </body>
 </html>
