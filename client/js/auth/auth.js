@@ -1,6 +1,29 @@
-import { login, register } from "../api/auth.api.js";
-import { mountStatusBanner, setBanner } from "../components/statusBanner.js";
+// /client/js/auth/auth.js
+export async function login({ username, password }) {
+  const res = await fetch("/api/auth/login", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ username, password })
+  });
 
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.message || "Login failed");
+  return data;
+}
+
+export async function register({ username, password }) {
+  const res = await fetch("/api/auth/register", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ username, password })
+  });
+
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.message || "Register failed");
+  return data;
+}
+
+// Auth page mounting functionality
 export function mountAuthPage() {
   const form = document.getElementById("loginForm");
   const usernameInput = document.getElementById("username");
@@ -14,8 +37,6 @@ export function mountAuthPage() {
     return;
   }
 
-  mountStatusBanner(statusMount);
-
   registerLink.addEventListener("click", async (e) => {
     e.preventDefault();
 
@@ -23,22 +44,21 @@ export function mountAuthPage() {
     const password = passwordInput.value;
 
     if (!username || !password) {
-      setBanner({ type: "error", message: "Enter a username and password first." });
+      alert("Enter a username and password first.");
       return;
     }
 
     setLoading(true);
-    setBanner(null);
 
     try {
       const result = await register({ username, password });
       if (result?.token) {
         localStorage.setItem("auth_token", result.token);
-        setBanner({ type: "success", message: "Registered successfully. Redirecting..." });
+        alert("Registered successfully. Redirecting...");
         window.location.href = "/dashboard";
       }
     } catch (err) {
-      setBanner({ type: "error", message: err.message });
+      alert(err.message);
     } finally {
       setLoading(false);
     }
@@ -51,22 +71,21 @@ export function mountAuthPage() {
     const password = passwordInput.value;
 
     if (!username || !password) {
-      setBanner({ type: "error", message: "Please enter both username and password." });
+      alert("Please enter both username and password.");
       return;
     }
 
     setLoading(true);
-    setBanner(null);
 
     try {
       const result = await login({ username, password });
       if (result?.token) {
         localStorage.setItem("auth_token", result.token);
-        setBanner({ type: "success", message: "Login successful. Redirecting..." });
+        alert("Login successful. Redirecting...");
         window.location.href = "/dashboard";
       }
     } catch (err) {
-      setBanner({ type: "error", message: err.message });
+      alert(err.message);
     } finally {
       setLoading(false);
     }
