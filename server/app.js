@@ -6,6 +6,7 @@ const express = require("express");
 const path = require("path");
 const bcrypt = require("bcrypt");
 const connectDB = require("./config/authDB");
+const auth = require("./middleware/auth");
 const User = require("./models/user");
 const Recipe = require("./models/recipe");
 console.log("Models loaded:", { hasUser: !!User, hasRecipe: !!Recipe });
@@ -95,7 +96,6 @@ app.post("/api/auth/login", async (req, res) => {
   return res.status(500).json({ message: "Server error", error: err.message });
 }
 });
-
 function validateRecipePayload(body) {
   const errors = [];
 
@@ -116,7 +116,9 @@ function validateRecipePayload(body) {
 
   if (
     body.estimated_time_minutes !== undefined &&
-    (typeof body.estimated_time_minutes !== "number" || Number.isNaN(body.estimated_time_minutes) || body.estimated_time_minutes < 0)
+    (typeof body.estimated_time_minutes !== "number" ||
+      Number.isNaN(body.estimated_time_minutes) ||
+      body.estimated_time_minutes < 0)
   ) {
     errors.push("estimated_time_minutes must be a number >= 0.");
   }
@@ -142,14 +144,23 @@ function validateRecipePayload(body) {
   return errors;
 }
 
-app.post("/api/recipes", async (req, res) => {
+// assumes your auth middleware sets req.user = { userId, username, iat, exp }
+app.post("/api/recipes", auth, async (req, res) => {
   const errors = validateRecipePayload(req.body);
   if (errors.length) {
-    return res.status(400).json({ error: "Invalid recipe payload", details: errors });
+    return res
+      .status(400)
+      .json({ error: "Invalid recipe payload", details: errors });
+  }
+
+  const userId = req.user?.userId;
+  if (!userId) {
+    return res.status(401).json({ error: "Missing userId in token" });
   }
 
   try {
     const saved = await Recipe.create({
+      owner: userId,
       title: req.body.title.trim(),
       why_it_fits: req.body.why_it_fits ?? "",
       missing_ingredients: req.body.missing_ingredients ?? [],
@@ -161,9 +172,29 @@ app.post("/api/recipes", async (req, res) => {
 
     return res.status(201).json(saved);
   } catch (err) {
-    return res.status(400).json({ error: "Failed to save recipe", details: err.message });
+    return res
+      .status(400)
+      .json({ error: "Failed to save recipe", details: err.message });
   }
 });
+
+// optional: load saved recipes for the logged-in user
+app.get("/api/recipes", auth, async (req, res) => {
+  const userId = req.user?.userId;
+  if (!userId) {
+    return res.status(401).json({ error: "Missing userId in token" });
+  }
+
+  try {
+    const recipes = await Recipe.find({ owner: userId }).sort({ createdAt: -1 });
+    return res.json(recipes); // array
+  } catch (err) {
+    return res
+      .status(500)
+      .json({ error: "Failed to load recipes", details: err.message });
+  }
+});
+
 
 
 

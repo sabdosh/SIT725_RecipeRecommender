@@ -2,6 +2,14 @@ const mongoose = require("mongoose");
 
 const recipeSchema = new mongoose.Schema(
   {
+    // link recipe to a user
+    owner: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
+      index: true
+    },
+
     title: { type: String, required: true, trim: true, minlength: 1 },
 
     why_it_fits: { type: String, default: "" },
