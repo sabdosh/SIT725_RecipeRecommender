@@ -5,9 +5,10 @@ console.log("✅ app.js loaded");
 const express = require("express");
 const path = require("path");
 const bcrypt = require("bcrypt");
-
 const connectDB = require("./config/authDB");
 const User = require("./models/user");
+const Recipe = require("./models/recipe");
+console.log("Models loaded:", { hasUser: !!User, hasRecipe: !!Recipe });
 const jwt = require("jsonwebtoken");
 
 
@@ -92,6 +93,38 @@ app.post("/api/auth/login", async (req, res) => {
   } catch (err) {
     return res.status(500).json({ message: "Server error" });
   }
+});
+
+app.post("/api/recipes", async (req, res, next) => {
+  try {
+    const recipe = await Recipe.create(req.body);
+    return res.status(201).json(recipe);
+  } catch (err) {
+    next(err); // lets global handler catch it
+  }
+});
+
+app.get("/test-save", async (req, res) => {
+  const Recipe = require("./models/recipe");
+
+  const r = await Recipe.create({
+    title: "Test Pasta",
+    why_it_fits: "Quick",
+    missing_ingredients: ["cheese"],
+    estimated_time_minutes: 10,
+    difficulty: "Easy",
+    steps: ["Boil water"],
+    optional_additions: []
+  });
+
+  res.json(r);
+});
+
+
+// GLOBAL ERROR HANDLER
+app.use((err, req, res, next) => {
+  console.error("UNCAUGHT ERROR:", err);
+  res.status(500).json({ message: "Server error" });
 });
 
 module.exports = app;
