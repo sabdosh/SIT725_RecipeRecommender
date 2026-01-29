@@ -5,6 +5,15 @@
   const statusEl = document.getElementById("status");
   const resultsEl = document.getElementById("results");
   const submitBtn = document.getElementById("submitBtn");
+  const logoutLink = document.querySelector('a[aria-label="Log out"]');
+  if (logoutLink) {
+    logoutLink.addEventListener("click", (e) => {
+      e.preventDefault();
+      localStorage.removeItem("auth_token");
+
+      window.location.href = "/";
+    });
+  }
 
   function setStatus(msg, isError = false) {
     statusEl.textContent = msg;
@@ -94,6 +103,7 @@
 
   // Set up event listeners for test buttons
   function setupTestButtons() {
+
     if (testDataBtn) {
       testDataBtn.addEventListener("click", () => {
         // Fill with sample ingredients
