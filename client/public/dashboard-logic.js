@@ -5,10 +5,6 @@
   const statusEl = document.getElementById("status");
   const resultsEl = document.getElementById("results");
   const submitBtn = document.getElementById("submitBtn");
-  
-  // Get the test buttons from HTML
-  const enableMockBtn = document.getElementById("enableMockBtn");
-  const testDataBtn = document.getElementById("testDataBtn");
 
   function setStatus(msg, isError = false) {
     statusEl.textContent = msg;
@@ -95,97 +91,9 @@
     return data;
   };
 
-  // Add test mode flag and mock function
-  window.enableMockMode = function() {
-    const originalFetch = window.fetchSuggestions;
-    
-    window.fetchSuggestions = async function(payload) {
-      console.log("📋 Mock API called with payload:", payload);
-      
-      // Simulate network delay
-      await new Promise(resolve => setTimeout(resolve, 800));
-      
-      // Return mock response matching the screenshot style
-      return {
-        ok: true,
-        recipes: [
-          {
-            title: "Classic Chicken Stir-Fry",
-            estimated_time_minutes: 25,
-            servings: 4,
-            description: "Quick and easy chicken stir-fry with vegetables and savory sauce.",
-            why_it_fits: "Uses your chicken, vegetables, and basic pantry staples",
-            missing_ingredients: ["soy sauce", "cornstarch"],
-            steps: [
-              "Cut chicken into bite-sized pieces",
-              "Stir-fry vegetables in hot oil",
-              "Add chicken and cook until done",
-              "Mix sauce ingredients and simmer"
-            ],
-            optional_additions: ["Bell peppers", "Broccoli", "Cashews"]
-          },
-          {
-            title: "Tomato Pasta Primavera",
-            estimated_time_minutes: 30,
-            servings: 4,
-            description: "Fresh pasta with tomatoes, garlic, and seasonal vegetables.",
-            why_it_fits: "Perfect for your pasta, tomatoes, and garlic",
-            missing_ingredients: ["fresh basil", "parmesan"],
-            steps: [
-              "Cook pasta according to package",
-              "Sauté garlic and tomatoes",
-              "Add seasonal vegetables",
-              "Combine with pasta and toss"
-            ],
-            optional_additions: ["Zucchini", "Mushrooms", "Spinach"]
-          },
-          {
-            title: "Garlic Butter Rice Bowl",
-            estimated_time_minutes: 20,
-            servings: 2,
-            description: "Simple and flavorful rice bowl with garlic butter sauce.",
-            why_it_fits: "Uses your rice and garlic efficiently",
-            missing_ingredients: ["butter", "lemon"],
-            steps: [
-              "Cook rice until fluffy",
-              "Melt butter with minced garlic",
-              "Mix garlic butter into rice",
-              "Season with salt and pepper"
-            ],
-            optional_additions: ["Parsley", "Green onions", "Toasted sesame seeds"]
-          }
-        ]
-      };
-    };
-    
-    console.log("✅ Mock mode enabled. Using simulated data instead of real API.");
-    return function disableMock() {
-      window.fetchSuggestions = originalFetch;
-      console.log("✅ Mock mode disabled. Back to real API.");
-    };
-  };
 
   // Set up event listeners for test buttons
   function setupTestButtons() {
-    let disableMock = null;
-    
-    if (enableMockBtn) {
-      enableMockBtn.addEventListener("click", () => {
-        if (!disableMock) {
-          disableMock = window.enableMockMode();
-          enableMockBtn.textContent = "Disable Mock Mode";
-          enableMockBtn.style.backgroundColor = "#f44336";
-          statusEl.textContent = "Mock mode enabled. All API calls will use simulated data.";
-        } else {
-          disableMock();
-          disableMock = null;
-          enableMockBtn.textContent = "Enable Mock Mode";
-          enableMockBtn.style.backgroundColor = "#4CAF50";
-          statusEl.textContent = "Mock mode disabled. Using real API.";
-        }
-      });
-    }
-    
     if (testDataBtn) {
       testDataBtn.addEventListener("click", () => {
         // Fill with sample ingredients
