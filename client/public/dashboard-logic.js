@@ -81,9 +81,22 @@
     alert(`Details for: ${recipeTitle}\n\nThis would show the full recipe with ingredients and steps.`);
   };
 
-  window.saveRecipe = function(recipeTitle) {
-    alert(`Saved: ${recipeTitle}\n\nRecipe saved to your collection!`);
-  };
+window.saveRecipe = async function(recipe) {
+  const res = await fetch("/api/recipes", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(recipe)
+  });
+
+  if (!res.ok) {
+    alert("Save failed");
+    return;
+  }
+
+  alert("Recipe saved!");
+};
+
+
 
   // Make fetchSuggestions available globally for testing
   window.fetchSuggestions = async function(payload) {
@@ -100,19 +113,6 @@
     return data;
   };
 
-
-  // Set up event listeners for test buttons
-  function setupTestButtons() {
-
-    if (testDataBtn) {
-      testDataBtn.addEventListener("click", () => {
-        // Fill with sample ingredients
-        ingredientsEl.value = "chicken, rice, tomatoes, garlic, pasta, eggs, cheese, onions";
-        // Submit the form
-        form.dispatchEvent(new Event("submit"));
-      });
-    }
-  }
 
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
@@ -151,10 +151,4 @@
     }
   });
 
-  // Set up test buttons when page loads
-  if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", setupTestButtons);
-  } else {
-    setupTestButtons();
-  }
 })();

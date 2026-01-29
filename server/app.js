@@ -90,41 +90,81 @@ app.post("/api/auth/login", async (req, res) => {
     );
 
     return res.json({ token });
-  } catch (err) {
-    return res.status(500).json({ message: "Server error" });
-  }
+} catch (err) {
+  console.error("LOGIN ERROR:", err);
+  return res.status(500).json({ message: "Server error", error: err.message });
+}
 });
 
-app.post("/api/recipes", async (req, res, next) => {
+function validateRecipePayload(body) {
+  const errors = [];
+
+  if (!body || typeof body !== "object" || Array.isArray(body)) {
+    errors.push("Body must be a JSON object.");
+    return errors;
+  }
+
+  // required: title only
+  if (typeof body.title !== "string" || body.title.trim().length === 0) {
+    errors.push("title is required and must be a non-empty string.");
+  }
+
+  // optional fields: validate type only if present
+  if (body.why_it_fits !== undefined && typeof body.why_it_fits !== "string") {
+    errors.push("why_it_fits must be a string.");
+  }
+
+  if (
+    body.estimated_time_minutes !== undefined &&
+    (typeof body.estimated_time_minutes !== "number" || Number.isNaN(body.estimated_time_minutes) || body.estimated_time_minutes < 0)
+  ) {
+    errors.push("estimated_time_minutes must be a number >= 0.");
+  }
+
+  if (
+    body.difficulty !== undefined &&
+    !["Easy", "Medium", "Hard"].includes(body.difficulty)
+  ) {
+    errors.push('difficulty must be one of: "Easy", "Medium", "Hard".');
+  }
+
+  const arrayFields = ["missing_ingredients", "steps", "optional_additions"];
+  for (const f of arrayFields) {
+    if (body[f] !== undefined && !Array.isArray(body[f])) {
+      errors.push(`${f} must be an array of strings.`);
+      continue;
+    }
+    if (Array.isArray(body[f]) && body[f].some((x) => typeof x !== "string")) {
+      errors.push(`${f} must contain only strings.`);
+    }
+  }
+
+  return errors;
+}
+
+app.post("/api/recipes", async (req, res) => {
+  const errors = validateRecipePayload(req.body);
+  if (errors.length) {
+    return res.status(400).json({ error: "Invalid recipe payload", details: errors });
+  }
+
   try {
-    const recipe = await Recipe.create(req.body);
-    return res.status(201).json(recipe);
+    const saved = await Recipe.create({
+      title: req.body.title.trim(),
+      why_it_fits: req.body.why_it_fits ?? "",
+      missing_ingredients: req.body.missing_ingredients ?? [],
+      estimated_time_minutes: req.body.estimated_time_minutes ?? 0,
+      difficulty: req.body.difficulty, // optional
+      steps: req.body.steps ?? [],
+      optional_additions: req.body.optional_additions ?? [],
+    });
+
+    return res.status(201).json(saved);
   } catch (err) {
-    next(err); // lets global handler catch it
+    return res.status(400).json({ error: "Failed to save recipe", details: err.message });
   }
 });
 
-app.get("/test-save", async (req, res) => {
-  const Recipe = require("./models/recipe");
 
-  const r = await Recipe.create({
-    title: "Test Pasta",
-    why_it_fits: "Quick",
-    missing_ingredients: ["cheese"],
-    estimated_time_minutes: 10,
-    difficulty: "Easy",
-    steps: ["Boil water"],
-    optional_additions: []
-  });
-
-  res.json(r);
-});
-
-
-// GLOBAL ERROR HANDLER
-app.use((err, req, res, next) => {
-  console.error("UNCAUGHT ERROR:", err);
-  res.status(500).json({ message: "Server error" });
-});
 
 module.exports = app;
