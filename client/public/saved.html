@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Recipe AI - Saved Recipes</title>
+    <link rel="stylesheet" href="/src/css/style.css" />
+    <link rel="stylesheet" href="/src/css/saved.css" />
+  </head>
+
+  <body>
+    <header class="topbar" aria-label="Top navigation">
+      <div class="topbar__inner">
+        <div class="brand">Recipe AI</div>
+        <nav class="topbar__nav">
+          <a class="topbar__link" href="/public/dashboard.html">Dashboard</a>
+          <a class="topbar__link" href="#" id="logoutBtn">Log Out</a>
+        </nav>
+      </div>
+    </header>
+
+    <main class="savedShell">
+      <div class="savedTopRow">
+        <a class="savedBack" href="/public/dashboard.html">
+          ← <span>Back</span>
+        </a>
+        <h1 class="savedTitle">Saved Recipes</h1>
+      </div>
+
+      <div id="status" class="statusMount" aria-live="polite"></div>
+
+      <section id="emptyState" class="emptyBox">
+        <div>
+          <p class="emptyMain">No saved recipes yet.</p>
+          <p class="emptySub">
+            Save recipes from the results page to see them here.
+          </p>
+          <a class="btnBlue" href="/public/dashboard.html">Find Recipes</a>
+        </div>
+      </section>
+
+      <section id="savedSection" class="savedGridWrap" hidden>
+        <div id="savedGrid" class="recipe-grid"></div>
+      </section>
+    </main>
+<script src="/public/saved-logic.js"></script>
+<script src="/public/logout.js"></script>
+
+  </body>
+</html>

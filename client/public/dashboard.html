@@ -5,16 +5,22 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Recipe AI - Dashboard</title>
     <link rel="stylesheet" href="/src/css/style.css" />
+
   </head>
 
   <body>
     <header class="topbar" aria-label="Top navigation">
       <div class="topbar__inner">
         <div class="brand">Recipe AI</div>
-        <nav class="topbar__nav">
-          <a class="topbar__link" href="#" aria-label="Saved recipes">Saved Recipes</a>
-          <a class="topbar__link" href="#" aria-label="Log out">Log Out</a>
-        </nav>
+       <nav class="topbar__nav">
+  <a class="topbar__link" href="/public/saved.html" aria-label="Saved recipes">
+    Saved Recipes
+  </a>
+  <a class="topbar__link" href="#" id="logoutBtn" aria-label="Log out">
+    Log Out
+  </a>
+</nav>
+
       </div>
     </header>
 
@@ -79,6 +85,8 @@
 
     <!-- ✅ IMPORTANT: since client/ is served statically, this path works -->
     <script src="/public/dashboard-logic.js?v=2"></script>
+        <script src="/public/logout.js"></script>
+
     
     <!-- Add quick-add functionality -->
     <script>
@@ -107,6 +115,8 @@
           });
         });
       });
+
     </script>
+
   </body>
 </html>

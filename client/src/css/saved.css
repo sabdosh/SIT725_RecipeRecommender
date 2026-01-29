@@ -1,0 +1,78 @@
+/* Saved Recipes Page (Wireframe) */
+
+.savedShell {
+  max-width: 1050px;
+  margin: 0 auto;
+  padding: 24px 16px;
+}
+
+.savedTopRow {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 10px 0 18px;
+}
+
+.savedBack {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: #111;
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.savedBack:hover {
+  text-decoration: underline;
+}
+
+.savedTitle {
+  margin: 0;
+  font-size: 22px;
+  font-weight: 700;
+}
+
+.emptyBox {
+  border: 1px solid #e6e6e6;
+  border-radius: 10px;
+  background: #fff;
+  padding: 48px 22px;
+  min-height: 230px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
+.emptyMain {
+  font-size: 18px;
+  font-weight: 600;
+  margin-bottom: 14px;   
+  line-height: 1.4;
+}
+
+.emptySub {
+  color: #6b7280;
+  margin-bottom: 24px;   
+  font-size: 14px;
+  line-height: 1.6;     
+}
+
+.btnBlue {
+  display: inline-block;
+  background: #2563eb;
+  color: #fff;
+  padding: 10px 18px;
+  border-radius: 8px;
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.btnBlue:hover {
+  filter: brightness(0.95);
+}
+
+.savedGridWrap {
+  margin-top: 18px;
+}
