@@ -178,6 +178,30 @@ app.post("/api/recipes", auth, async (req, res) => {
   }
 });
 
+app.delete("/api/recipes/:id", auth, async (req, res) => {
+  const userId = req.user?.userId;
+  if (!userId) {
+    return res.status(401).json({ error: "Missing userId in token" });
+  }
+
+  const id = req.params.id;
+  if (!id || !/^[0-9a-fA-F]{24}$/.test(id)) {
+    return res.status(400).json({ error: "Invalid recipe id" });
+  }
+
+  try {
+    const deleted = await Recipe.findOneAndDelete({ _id: id, owner: userId });
+    if (!deleted) {
+      return res.status(404).json({ error: "Recipe not found" });
+    }
+    return res.json({ ok: true });
+  } catch (err) {
+    return res
+      .status(500)
+      .json({ error: "Failed to delete recipe", details: err.message });
+  }
+});
+
 
 // Save logic
 
@@ -200,4 +224,3 @@ app.get("/api/saved", auth, async (req, res) => {
 
 
 module.exports = app;
-
