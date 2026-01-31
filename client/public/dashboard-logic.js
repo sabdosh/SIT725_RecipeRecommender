@@ -1,5 +1,6 @@
 // client/public/dashboard-logic.js
 (function () {
+<<<<<<< HEAD
   const form = document.getElementById("recipeForm");
   const ingredientsEl = document.getElementById("ingredients");
   const statusEl = document.getElementById("status");
@@ -14,34 +15,53 @@
       window.location.href = "/";
     });
   }
+=======
+  document.addEventListener("DOMContentLoaded", function () {
+    const form = document.getElementById("recipeForm");
+    const ingredientsEl = document.getElementById("ingredients");
+    const statusEl = document.getElementById("status");
+    const resultsEl = document.getElementById("results");
+    const submitBtn = document.getElementById("submitBtn");
+>>>>>>> 02817c9 (Removed mock feature)
 
-  function setStatus(msg, isError = false) {
-    statusEl.textContent = msg;
-    statusEl.style.color = isError ? "crimson" : "inherit";
-  }
+    if (!form || !ingredientsEl || !statusEl || !resultsEl) {
+      console.error("Required dashboard elements not found:", {
+        form,
+        ingredientsEl,
+        statusEl,
+        resultsEl,
+        submitBtn,
+      });
+      return;
+    }
 
-  function escapeHtml(str) {
-    return String(str ?? "")
-      .replaceAll("&", "&amp;")
-      .replaceAll("<", "&lt;")
-      .replaceAll(">", "&gt;")
-      .replaceAll('"', "&quot;")
-      .replaceAll("'", "&#039;");
-  }
+    function setStatus(msg, isError = false) {
+      statusEl.textContent = msg;
+      statusEl.style.color = isError ? "crimson" : "inherit";
+    }
 
-  function renderRecipes(recipes) {
-    resultsEl.innerHTML = "";
-    resultsEl.className = "recipe-grid"; // Ensure grid class is applied
-    
-    for (const r of recipes) {
-      const card = document.createElement("article");
-      card.className = "recipe-card";
-      
-      // Format time and servings for display
-      const time = r.estimated_time_minutes || 30;
-      const servings = r.servings || 4;
-      
-      card.innerHTML = `
+    function escapeHtml(str) {
+      return String(str ?? "")
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+    }
+
+    function renderRecipes(recipes) {
+      resultsEl.innerHTML = "";
+      resultsEl.className = "recipe-grid"; // Ensure grid class is applied
+
+      for (const r of recipes) {
+        const card = document.createElement("article");
+        card.className = "recipe-card";
+
+        // Format time and servings for display
+        const time = r.estimated_time_minutes || 30;
+        const servings = r.servings || 4;
+
+        card.innerHTML = `
         <div class="recipe-card__content">
           <div class="recipe-card__header">
             <h3 class="recipe-card__title">${escapeHtml(r.title || "Recipe")}</h3>
@@ -63,19 +83,26 @@
                 ${servings} servings
               </div>
             </div>
-            <p class="recipe-card__description">${escapeHtml(r.description || r.why_it_fits || "")}</p>
+            <p class="recipe-card__description">${escapeHtml(
+              r.description || r.why_it_fits || ""
+            )}</p>
           </div>
           <div class="recipe-card__actions">
-            <a href="#" class="btn btn--primary" onclick="event.preventDefault(); showRecipeDetails('${escapeHtml(r.title || '')}')">View Details</a>
-            <a href="#" class="btn btn--secondary" onclick="event.preventDefault(); saveRecipe('${escapeHtml(r.title || '')}')">Save</a>
+            <a href="#" class="btn btn--primary" onclick="event.preventDefault(); showRecipeDetails('${escapeHtml(
+              r.title || ""
+            )}')">View Details</a>
+            <a href="#" class="btn btn--secondary" onclick="event.preventDefault(); saveRecipe('${escapeHtml(
+              r.title || ""
+            )}')">Save</a>
           </div>
         </div>
       `;
-      
-      resultsEl.appendChild(card);
-    }
-  }
 
+        resultsEl.appendChild(card);
+      }
+    }
+
+<<<<<<< HEAD
   // Dummy functions for buttons
   window.showRecipeDetails = function(recipeTitle) {
     alert(`Details for: ${recipeTitle}\n\nThis would show the full recipe with ingredients and steps.`);
@@ -113,42 +140,81 @@ window.saveRecipe = async function(recipe) {
     return data;
   };
 
+=======
+    // Dummy functions for buttons
+    window.showRecipeDetails = function (recipeTitle) {
+      alert(
+        `Details for: ${recipeTitle}\n\nThis would show the full recipe with ingredients and steps.`
+      );
+    };
 
-  form.addEventListener("submit", async (e) => {
-    e.preventDefault();
+    window.saveRecipe = function (recipeTitle) {
+      alert(`Saved: ${recipeTitle}\n\nRecipe saved to your collection!`);
+    };
 
-    resultsEl.innerHTML = "";
+    // Make fetchSuggestions available globally for testing
+    window.fetchSuggestions = async function (payload) {
+      const resp = await fetch("/api/gemini/recipes", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+>>>>>>> 02817c9 (Removed mock feature)
 
-    const ingredientsText = ingredientsEl.value.trim();
-    if (!ingredientsText) {
-      setStatus("Please enter at least one ingredient.", true);
-      return;
-    }
+      const data = await resp.json().catch(() => null);
+      if (!resp.ok || !data?.ok) {
+        throw new Error(data?.error || `Request failed (${resp.status})`);
+      }
+      return data;
+    };
 
-    const ingredients = ingredientsText
-      .split(/\n|,/g)
-      .map(s => s.trim())
-      .filter(Boolean);
+    // ✅ FIX: wire up the form submit so clicking the button does something
+    form.addEventListener("submit", async function (e) {
+      e.preventDefault();
 
-    submitBtn.disabled = true;
-    setStatus("Asking Gemini for suggestions...");
-
-    try {
-      const data = await window.fetchSuggestions({ ingredients });
-
-      const recipes = Array.isArray(data.recipes) ? data.recipes : [];
-      if (!recipes.length) {
-        setStatus("No recipes returned. Try adding more ingredients.", true);
+      const raw = (ingredientsEl.value || "").trim();
+      if (!raw) {
+        setStatus("Please enter at least one ingredient.", true);
         return;
       }
 
-      setStatus(`Found ${recipes.length} recipe suggestion(s).`);
-      renderRecipes(recipes);
-    } catch (err) {
-      setStatus(err.message || "Something went wrong.", true);
-    } finally {
-      submitBtn.disabled = false;
-    }
-  });
+      const ingredients = raw
+        .split(/,|\n/)
+        .map((s) => s.trim())
+        .filter(Boolean);
 
+<<<<<<< HEAD
 })();
+=======
+      if (ingredients.length === 0) {
+        setStatus("Please enter at least one ingredient.", true);
+        return;
+      }
+
+      setStatus("Fetching recipe suggestions...");
+      if (submitBtn) submitBtn.disabled = true;
+
+      try {
+        const data = await window.fetchSuggestions({ ingredients });
+
+        // Common response shapes: { ok:true, recipes:[...] } or { ok:true, data:{ recipes:[...] } }
+        const recipes = data?.recipes || data?.data?.recipes || data?.data || [];
+
+        if (!Array.isArray(recipes) || recipes.length === 0) {
+          setStatus("No recipes returned. Try different ingredients.", true);
+          resultsEl.innerHTML = "";
+          return;
+        }
+
+        setStatus(`Found ${recipes.length} recipe suggestion(s).`);
+        renderRecipes(recipes);
+      } catch (err) {
+        setStatus(err?.message || "Something went wrong.", true);
+        resultsEl.innerHTML = "";
+      } finally {
+        if (submitBtn) submitBtn.disabled = false;
+      }
+    });
+  });
+})();
+>>>>>>> 02817c9 (Removed mock feature)
