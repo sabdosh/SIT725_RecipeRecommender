@@ -1,28 +1,11 @@
 // client/public/dashboard-logic.js
 (function () {
-<<<<<<< HEAD
-  const form = document.getElementById("recipeForm");
-  const ingredientsEl = document.getElementById("ingredients");
-  const statusEl = document.getElementById("status");
-  const resultsEl = document.getElementById("results");
-  const submitBtn = document.getElementById("submitBtn");
-  const logoutLink = document.querySelector('a[aria-label="Log out"]');
-  if (logoutLink) {
-    logoutLink.addEventListener("click", (e) => {
-      e.preventDefault();
-      localStorage.removeItem("auth_token");
-
-      window.location.href = "/";
-    });
-  }
-=======
   document.addEventListener("DOMContentLoaded", function () {
     const form = document.getElementById("recipeForm");
     const ingredientsEl = document.getElementById("ingredients");
     const statusEl = document.getElementById("status");
     const resultsEl = document.getElementById("results");
     const submitBtn = document.getElementById("submitBtn");
->>>>>>> 02817c9 (Removed mock feature)
 
     if (!form || !ingredientsEl || !statusEl || !resultsEl) {
       console.error("Required dashboard elements not found:", {
@@ -100,50 +83,8 @@
 
         resultsEl.appendChild(card);
       }
-<<<<<<< HEAD
     }
 
-<<<<<<< HEAD
-  // Dummy functions for buttons
-  window.showRecipeDetails = function(recipeTitle) {
-    alert(`Details for: ${recipeTitle}\n\nThis would show the full recipe with ingredients and steps.`);
-  };
-
-window.saveRecipe = async function(recipe) {
-  const res = await fetch("/api/recipes", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(recipe)
-  });
-
-  if (!res.ok) {
-    alert("Save failed");
-    return;
-  }
-
-  alert("Recipe saved!");
-};
-
-
-
-  // Make fetchSuggestions available globally for testing
-  window.fetchSuggestions = async function(payload) {
-    const resp = await fetch("/api/gemini/recipes", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload)
-    });
-
-    const data = await resp.json().catch(() => null);
-    if (!resp.ok || !data?.ok) {
-      throw new Error(data?.error || `Request failed (${resp.status})`);
-=======
->>>>>>> bc253a25ca2ed8a22bcd769e3d84c963fdf16dc8
-    }
-    return data;
-  };
-
-=======
     // Dummy functions for buttons
     window.showRecipeDetails = function (recipeTitle) {
       alert(
@@ -162,32 +103,6 @@ window.saveRecipe = async function(recipe) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
       });
->>>>>>> 02817c9 (Removed mock feature)
-
-<<<<<<< HEAD
-      const data = await resp.json().catch(() => null);
-      if (!resp.ok || !data?.ok) {
-        throw new Error(data?.error || `Request failed (${resp.status})`);
-      }
-      return data;
-    };
-
-    // ✅ FIX: wire up the form submit so clicking the button does something
-    form.addEventListener("submit", async function (e) {
-      e.preventDefault();
-
-=======
-    window.saveRecipe = function (recipeTitle) {
-      alert(`Saved: ${recipeTitle}\n\nRecipe saved to your collection!`);
-    };
-
-    // Make fetchSuggestions available globally for testing
-    window.fetchSuggestions = async function (payload) {
-      const resp = await fetch("/api/gemini/recipes", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      });
 
       const data = await resp.json().catch(() => null);
       if (!resp.ok || !data?.ok) {
@@ -200,7 +115,6 @@ window.saveRecipe = async function(recipe) {
     form.addEventListener("submit", async function (e) {
       e.preventDefault();
 
->>>>>>> bc253a25ca2ed8a22bcd769e3d84c963fdf16dc8
       const raw = (ingredientsEl.value || "").trim();
       if (!raw) {
         setStatus("Please enter at least one ingredient.", true);
@@ -212,12 +126,6 @@ window.saveRecipe = async function(recipe) {
         .map((s) => s.trim())
         .filter(Boolean);
 
-<<<<<<< HEAD
-<<<<<<< HEAD
-})();
-=======
-=======
->>>>>>> bc253a25ca2ed8a22bcd769e3d84c963fdf16dc8
       if (ingredients.length === 0) {
         setStatus("Please enter at least one ingredient.", true);
         return;
@@ -249,7 +157,3 @@ window.saveRecipe = async function(recipe) {
     });
   });
 })();
-<<<<<<< HEAD
->>>>>>> 02817c9 (Removed mock feature)
-=======
->>>>>>> bc253a25ca2ed8a22bcd769e3d84c963fdf16dc8
