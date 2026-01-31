@@ -1,4 +1,4 @@
-console.log("✅ gemini.routes loaded");
+console.log("gemini.routes loaded");
 
 // server/routes/gemini.routes.js
 const express = require("express");

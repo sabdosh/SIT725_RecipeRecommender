@@ -1,6 +1,6 @@
 require("dotenv").config();
 
-console.log("✅ app.js loaded");
+console.log("app.js loaded");
 
 const express = require("express");
 const path = require("path");
@@ -178,8 +178,10 @@ app.post("/api/recipes", auth, async (req, res) => {
   }
 });
 
-// optional: load saved recipes for the logged-in user
-app.get("/api/recipes", auth, async (req, res) => {
+
+// Save logic
+
+app.get("/api/saved", auth, async (req, res) => {
   const userId = req.user?.userId;
   if (!userId) {
     return res.status(401).json({ error: "Missing userId in token" });
@@ -187,7 +189,7 @@ app.get("/api/recipes", auth, async (req, res) => {
 
   try {
     const recipes = await Recipe.find({ owner: userId }).sort({ createdAt: -1 });
-    return res.json(recipes); // array
+    return res.json({ recipes });
   } catch (err) {
     return res
       .status(500)
@@ -197,5 +199,5 @@ app.get("/api/recipes", auth, async (req, res) => {
 
 
 
-
 module.exports = app;
+

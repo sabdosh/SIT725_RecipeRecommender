@@ -6,6 +6,18 @@
     const statusEl = document.getElementById("status");
     const resultsEl = document.getElementById("results");
     const submitBtn = document.getElementById("submitBtn");
+    const recipeByTitle = new Map();
+    const savedTitles = new Set();
+
+    const logoutBtn = document.getElementById("logoutBtn");
+    if (logoutBtn) {
+      logoutBtn.addEventListener("click", function (e) {
+        e.preventDefault();
+        localStorage.removeItem("token");
+        localStorage.removeItem("auth_token");
+        window.location.href = "/public/index.html";
+      });
+    }
 
     if (!form || !ingredientsEl || !statusEl || !resultsEl) {
       console.error("Required dashboard elements not found:", {
@@ -32,15 +44,146 @@
         .replaceAll("'", "&#039;");
     }
 
+    function showTextModal(text) {
+      const existing = document.getElementById("recipeDetailsModal");
+      if (existing) existing.remove();
+
+      const overlay = document.createElement("div");
+      overlay.id = "recipeDetailsModal";
+      overlay.style.position = "fixed";
+      overlay.style.inset = "0";
+      overlay.style.background = "rgba(0,0,0,0.65)";
+      overlay.style.zIndex = "9999";
+      overlay.style.display = "flex";
+      overlay.style.alignItems = "center";
+      overlay.style.justifyContent = "center";
+      overlay.style.padding = "24px";
+
+      const box = document.createElement("div");
+      box.style.background = "#fff";
+      box.style.borderRadius = "12px";
+      box.style.width = "min(900px, 100%)";
+      box.style.maxHeight = "min(80vh, 900px)";
+      box.style.display = "flex";
+      box.style.flexDirection = "column";
+      box.style.boxShadow = "0 20px 60px rgba(0,0,0,0.35)";
+      box.style.overflow = "hidden";
+
+      const header = document.createElement("div");
+      header.style.display = "flex";
+      header.style.alignItems = "center";
+      header.style.justifyContent = "flex-end";
+      header.style.padding = "12px 12px 0 12px";
+
+      const closeBtn = document.createElement("button");
+      closeBtn.type = "button";
+      closeBtn.textContent = "×";
+      closeBtn.style.border = "none";
+      closeBtn.style.background = "transparent";
+      closeBtn.style.fontSize = "28px";
+      closeBtn.style.lineHeight = "28px";
+      closeBtn.style.cursor = "pointer";
+      closeBtn.style.padding = "6px 10px";
+
+      const body = document.createElement("pre");
+      body.style.margin = "0";
+      body.style.padding = "12px 16px 18px 16px";
+      body.style.whiteSpace = "pre-wrap";
+      body.style.wordBreak = "break-word";
+      body.style.overflow = "auto";
+      body.style.fontFamily = "inherit";
+      body.style.fontSize = "14px";
+      body.style.lineHeight = "1.5";
+      body.textContent = text || "";
+
+      function close() {
+        overlay.remove();
+        document.removeEventListener("keydown", onKey);
+      }
+
+      function onKey(e) {
+        if (e.key === "Escape") close();
+      }
+
+      closeBtn.addEventListener("click", close);
+      overlay.addEventListener("click", function (e) {
+        if (e.target === overlay) close();
+      });
+      document.addEventListener("keydown", onKey);
+
+      header.appendChild(closeBtn);
+      box.appendChild(header);
+      box.appendChild(body);
+      overlay.appendChild(box);
+      document.body.appendChild(overlay);
+    }
+
+    function normalizeList(v) {
+      if (v == null) return [];
+
+      if (Array.isArray(v)) {
+        return v
+          .flatMap((x) => normalizeList(x))
+          .map((s) => String(s).trim())
+          .filter(Boolean);
+      }
+
+      if (typeof v === "string") {
+        return v
+          .split(/,|\n/)
+          .map((s) => s.trim())
+          .filter(Boolean);
+      }
+
+      if (typeof v === "object") {
+        const container =
+          v.ingredients ??
+          v.items ??
+          v.list ??
+          v.data ??
+          v.used ??
+          v.usedIngredients ??
+          v.ingredients_used ??
+          v.ingredientsUsed ??
+          v.ingredientsList ??
+          v.ingredient_list ??
+          v.ingredientList ??
+          v.ingredient ??
+          v.text;
+
+        if (container !== undefined && container !== v) {
+          return normalizeList(container);
+        }
+
+        const name =
+          v.name ??
+          v.item ??
+          v.ingredient ??
+          v.text ??
+          v.title ??
+          "";
+
+        const qty = v.quantity ?? v.qty ?? "";
+        const unit = v.unit ?? "";
+        const base = [qty, unit, name].filter(Boolean).join(" ").trim();
+
+        return base ? [base] : [];
+      }
+
+      return [String(v).trim()].filter(Boolean);
+    }
+
     function renderRecipes(recipes) {
       resultsEl.innerHTML = "";
-      resultsEl.className = "recipe-grid"; // Ensure grid class is applied
+      recipeByTitle.clear();
+      resultsEl.className = "recipe-grid";
 
       for (const r of recipes) {
+        const key = (r.title || "").toString();
+        if (key) recipeByTitle.set(key, r);
         const card = document.createElement("article");
         card.className = "recipe-card";
 
-        // Format time and servings for display
         const time = r.estimated_time_minutes || 30;
         const servings = r.servings || 4;
 
@@ -85,18 +228,115 @@
       }
     }
 
-    // Dummy functions for buttons
+    function getAuthToken() {
+      return (
+        localStorage.getItem("token") || localStorage.getItem("auth_token") || ""
+      );
+    }
+
+    async function persistRecipe(recipe) {
+      const token = getAuthToken();
+      if (!token) return;
+
+      const key = (recipe?.title || "").toString();
+      if (key && savedTitles.has(key)) return;
+      if (key) savedTitles.add(key);
+
+      try {
+        const res = await fetch("/api/recipes", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify(recipe),
+        });
+
+        if (!res.ok) {
+          if (key) savedTitles.delete(key);
+        }
+      } catch (e) {
+        if (key) savedTitles.delete(key);
+        throw e;
+      }
+    }
+
+    async function autoSaveGeneratedRecipes(recipes) {
+      const token = getAuthToken();
+      if (!token) return;
+      const list = Array.isArray(recipes) ? recipes : [];
+      await Promise.allSettled(list.map((r) => persistRecipe(r)));
+    }
+
     window.showRecipeDetails = function (recipeTitle) {
-      alert(
-        `Details for: ${recipeTitle}\n\nThis would show the full recipe with ingredients and steps.`
+      const r = recipeByTitle.get(recipeTitle);
+
+      if (!r) {
+        showTextModal("Details for: " + recipeTitle);
+        return;
+      }
+
+      const steps = normalizeList(r.steps ?? r.instructions ?? r.method);
+      const ingredients = normalizeList(
+        r.ingredients ??
+          r.ingredients_used ??
+          r.ingredientsUsed ??
+          r.used_ingredients ??
+          r.usedIngredients ??
+          r.usedIngredientsList ??
+          r.ingredients_needed ??
+          r.ingredientsNeeded ??
+          r.ingredientsList ??
+          r.ingredient_list ??
+          r.ingredientList
+      );
+      const missing = normalizeList(
+        r.missing_ingredients ?? r.missingIngredients ?? r.missing
+      );
+      const optional = normalizeList(
+        r.optional_additions ?? r.optionalAdditions ?? r.optional
+      );
+
+      showTextModal(
+        `Recipe: ${r.title || recipeTitle}
+
+Steps:
+${steps.join("\n")}
+
+Missing Ingredients:
+${missing.join(", ")}
+
+Optional Additions:
+${optional.join(", ")}`
       );
     };
 
-    window.saveRecipe = function (recipeTitle) {
-      alert(`Saved: ${recipeTitle}\n\nRecipe saved to your collection!`);
+    window.saveRecipe = async function (recipeTitle) {
+      const token = getAuthToken();
+      if (!token) {
+        alert("Please log in to save recipes.");
+        return;
+      }
+
+      const r = recipeByTitle.get(recipeTitle);
+      if (!r) {
+        alert("Unable to save this recipe.");
+        return;
+      }
+
+      if (savedTitles.has(recipeTitle)) {
+        alert("This recipe has been saved - " + recipeTitle);
+        return;
+      }
+
+      try {
+        await persistRecipe(r);
+        alert("Saved: " + recipeTitle + "\n\nRecipe saved to your collection!");
+      } catch (err) {
+        alert("Unable to save recipe.");
+      }
     };
 
-    // Make fetchSuggestions available globally for testing
     window.fetchSuggestions = async function (payload) {
       const resp = await fetch("/api/gemini/recipes", {
         method: "POST",
@@ -111,7 +351,6 @@
       return data;
     };
 
-    // ✅ FIX: wire up the form submit so clicking the button does something
     form.addEventListener("submit", async function (e) {
       e.preventDefault();
 
@@ -137,7 +376,6 @@
       try {
         const data = await window.fetchSuggestions({ ingredients });
 
-        // Common response shapes: { ok:true, recipes:[...] } or { ok:true, data:{ recipes:[...] } }
         const recipes = data?.recipes || data?.data?.recipes || data?.data || [];
 
         if (!Array.isArray(recipes) || recipes.length === 0) {
@@ -148,6 +386,7 @@
 
         setStatus(`Found ${recipes.length} recipe suggestion(s).`);
         renderRecipes(recipes);
+        await autoSaveGeneratedRecipes(recipes);
       } catch (err) {
         setStatus(err?.message || "Something went wrong.", true);
         resultsEl.innerHTML = "";
