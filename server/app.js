@@ -1,3 +1,5 @@
+require("dotenv").config();
+
 console.log("✅ app.js loaded");
 
 const express = require("express");
@@ -6,8 +8,11 @@ const bcrypt = require("bcrypt");
 
 const connectDB = require("./config/authDB");
 const User = require("./models/user");
+const jwt = require("jsonwebtoken");
+
 
 const app = express();
+
 
 app.use(express.json());
 
@@ -28,6 +33,11 @@ app.get("/", (req, res) => {
   return res.sendFile(path.join(clientPath, "public", "index.html"));
 });
 
+app.get("/dashboard", (req, res) => {
+  res.sendFile(path.join(clientPath, "public", "dashboard.html"));
+});
+
+
 /**
  * REGISTER - create account
  */
@@ -43,17 +53,22 @@ app.post("/api/auth/register", async (req, res) => {
       return res.status(409).json({ message: "Username already exists" });
 
     const hashed = await bcrypt.hash(password, 10);
-    await User.create({ username, password: hashed });
 
-    return res.status(201).json({ token: "dummy-token" });
+    // IMPORTANT: capture the created user doc so you can sign a token
+    const created = await User.create({ username, password: hashed });
+
+    const token = jwt.sign(
+      { userId: created._id.toString(), username: created.username },
+      process.env.JWT_SECRET,
+      { expiresIn: "7d" }
+    );
+
+    return res.status(201).json({ token });
   } catch (err) {
     return res.status(500).json({ message: "Server error" });
   }
 });
 
-/**
- * LOGIN - validate existing account
- */
 app.post("/api/auth/login", async (req, res) => {
   try {
     const { username, password } = req.body;
@@ -67,14 +82,16 @@ app.post("/api/auth/login", async (req, res) => {
     const valid = await bcrypt.compare(password, user.password);
     if (!valid) return res.status(401).json({ message: "Invalid credentials" });
 
-    return res.json({ token: "dummy-token" });
+    const token = jwt.sign(
+      { userId: user._id.toString(), username: user.username },
+      process.env.JWT_SECRET,
+      { expiresIn: "7d" }
+    );
+
+    return res.json({ token });
   } catch (err) {
     return res.status(500).json({ message: "Server error" });
   }
-});
-
-app.get("/dashboard", (req, res) => {
-  return res.sendFile(path.join(clientPath, "public", "dashboard.html"));
 });
 
 module.exports = app;

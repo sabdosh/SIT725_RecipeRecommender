@@ -1,50 +1,47 @@
 // client/public/dashboard-logic.js
 (function () {
-  document.addEventListener("DOMContentLoaded", function () {
-    const form = document.getElementById("recipeForm");
-    const ingredientsEl = document.getElementById("ingredients");
-    const statusEl = document.getElementById("status");
-    const resultsEl = document.getElementById("results");
-    const submitBtn = document.getElementById("submitBtn");
+  const form = document.getElementById("recipeForm");
+  const ingredientsEl = document.getElementById("ingredients");
+  const statusEl = document.getElementById("status");
+  const resultsEl = document.getElementById("results");
+  const submitBtn = document.getElementById("submitBtn");
+  const logoutLink = document.querySelector('a[aria-label="Log out"]');
+  if (logoutLink) {
+    logoutLink.addEventListener("click", (e) => {
+      e.preventDefault();
+      localStorage.removeItem("auth_token");
 
-    if (!form || !ingredientsEl || !statusEl || !resultsEl) {
-      console.error("Required dashboard elements not found:", {
-        form,
-        ingredientsEl,
-        statusEl,
-        resultsEl,
-        submitBtn,
-      });
-      return;
-    }
+      window.location.href = "/";
+    });
+  }
 
-    function setStatus(msg, isError = false) {
-      statusEl.textContent = msg;
-      statusEl.style.color = isError ? "crimson" : "inherit";
-    }
+  function setStatus(msg, isError = false) {
+    statusEl.textContent = msg;
+    statusEl.style.color = isError ? "crimson" : "inherit";
+  }
 
-    function escapeHtml(str) {
-      return String(str ?? "")
-        .replaceAll("&", "&amp;")
-        .replaceAll("<", "&lt;")
-        .replaceAll(">", "&gt;")
-        .replaceAll('"', "&quot;")
-        .replaceAll("'", "&#039;");
-    }
+  function escapeHtml(str) {
+    return String(str ?? "")
+      .replaceAll("&", "&amp;")
+      .replaceAll("<", "&lt;")
+      .replaceAll(">", "&gt;")
+      .replaceAll('"', "&quot;")
+      .replaceAll("'", "&#039;");
+  }
 
-    function renderRecipes(recipes) {
-      resultsEl.innerHTML = "";
-      resultsEl.className = "recipe-grid"; // Ensure grid class is applied
-
-      for (const r of recipes) {
-        const card = document.createElement("article");
-        card.className = "recipe-card";
-
-        // Format time and servings for display
-        const time = r.estimated_time_minutes || 30;
-        const servings = r.servings || 4;
-
-        card.innerHTML = `
+  function renderRecipes(recipes) {
+    resultsEl.innerHTML = "";
+    resultsEl.className = "recipe-grid"; // Ensure grid class is applied
+    
+    for (const r of recipes) {
+      const card = document.createElement("article");
+      card.className = "recipe-card";
+      
+      // Format time and servings for display
+      const time = r.estimated_time_minutes || 30;
+      const servings = r.servings || 4;
+      
+      card.innerHTML = `
         <div class="recipe-card__content">
           <div class="recipe-card__header">
             <h3 class="recipe-card__title">${escapeHtml(r.title || "Recipe")}</h3>
@@ -84,13 +81,22 @@
         resultsEl.appendChild(card);
       }
     }
+    return data;
+  };
 
-    // Dummy functions for buttons
-    window.showRecipeDetails = function (recipeTitle) {
-      alert(
-        `Details for: ${recipeTitle}\n\nThis would show the full recipe with ingredients and steps.`
-      );
-    };
+
+  // Set up event listeners for test buttons
+  function setupTestButtons() {
+
+    if (testDataBtn) {
+      testDataBtn.addEventListener("click", () => {
+        // Fill with sample ingredients
+        ingredientsEl.value = "chicken, rice, tomatoes, garlic, pasta, eggs, cheese, onions";
+        // Submit the form
+        form.dispatchEvent(new Event("submit"));
+      });
+    }
+  }
 
     window.saveRecipe = function (recipeTitle) {
       alert(`Saved: ${recipeTitle}\n\nRecipe saved to your collection!`);
