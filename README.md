@@ -17,7 +17,6 @@ This project demonstrates secure backend integration, clean architectural design
 * MongoDB database connectivity for user management
 * Demo-ready, modular, and extensible design
 * User-scoped recipe persistence (JWT-protected endpoints)
-* Mock API mode for development and testing without external AI calls
 
 
 ---
@@ -224,7 +223,7 @@ http://localhost:3000/dashboard
 
 ---
 
-## Usage Gudie
+## Usage Guide
 
 ## Login/Register
 
@@ -283,7 +282,6 @@ The dashboard focuses only on ingredient input to:
 * Reduce error cases
 * Keep the feature intuitive and focused
 
----
 
 ## Error Handling & Reliability
 
@@ -291,7 +289,6 @@ The dashboard focuses only on ingredient input to:
 * Invalid AI output → graceful retry or failure
 * API or configuration errors → handled server-side
 
----
 
 ## Security Considerations
 
@@ -300,6 +297,55 @@ The dashboard focuses only on ingredient input to:
 * Controlled access via authentication
 * Clean input handling
 
----
 
+## Automated Backend Testing (Gemini Recipe API)
 
+This project includes automated backend tests for the Gemini recipe API using Jest and Supertest.
+
+The tests validate API behavior in isolation by mocking all external dependencies, ensuring fast, reliable, and repeatable test execution without requiring a database connection or real Gemini API calls.
+
+**What is tested**
+
+- API route availability
+
+- Successful recipe generation with valid input
+
+- Proper input validation and 400 error responses for invalid input
+
+- Response JSON structure for generated recipes
+
+**Testing approach**
+
+- Jest is used as the test runner
+
+- Supertest is used to simulate HTTP requests to the Express app
+
+- Gemini API calls are mocked by default
+
+- Database connections are mocked to avoid external dependencies
+
+**How to run the tests**
+
+From the project root:
+
+```
+npm install
+npm test
+```
+
+No environment variables, database, or Gemini API key are required to run the tests.
+
+**Test location**
+
+```
+tests/jest/gemini.recipes.test.js
+```
+
+**Expected output**
+
+```
+PASS  tests/jest/gemini.recipes.test.js
+ ✓ GET /api/gemini/health is available
+ ✓ POST /api/gemini/recipes returns expected structure for valid input
+ ✓ POST /api/gemini/recipes returns 400 for invalid input
+```
