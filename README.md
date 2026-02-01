@@ -16,6 +16,8 @@ This project demonstrates secure backend integration, clean architectural design
 * Structured recipe outputs rendered as user-friendly cards
 * MongoDB database connectivity for user management
 * Demo-ready, modular, and extensible design
+* User-scoped recipe persistence (JWT-protected endpoints)
+
 
 ---
 
@@ -32,6 +34,30 @@ This project demonstrates secure backend integration, clean architectural design
 * REST API endpoints
 * Gemini AI integration
 * MongoDB connection via Mongoose
+
+**Folder Structure**
+```
+SIT725_RecipeRecommender/
+├── client/
+│ ├── public/
+│ │ ├── index.html
+│ │ ├── dashboard.html
+│ │ ├── saved.html
+│ │ ├── styles.css
+│ │ ├── login-logic.js
+│ │ ├── dashboard-logic.js
+│ │ └── saved-logic.js
+│ └── ...
+├── server/
+│ ├── app.js
+│ ├── server.js
+│ ├── config/
+│ ├── middleware/
+│ ├── models/
+│ └── routes/
+└── README.md
+```
+
 
 **External Services**
 
@@ -78,6 +104,8 @@ The backend connects to a MongoDB database using **Mongoose**. This database sup
 * User account storage
 * Authentication workflows
 * Future persistence of generated recipes
+* User-scoped persistence of saved recipes
+
 
 ### Database Connection
 
@@ -93,7 +121,8 @@ Relevant file:
 
 ### Feature Description
 
-Users enter a list of ingredients on the dashboard. The system sends these ingredients to the backend, which calls the **Google Gemini API** to generate recipe suggestions.
+Users enter a list of ingredients on the dashboard. The system sends these ingredients to the backend, which calls the **Google Gemini API** to generate recipe suggestions. The dashboard also includes quick-add ingredient inputs to streamline validation and iteration.
+
 
 The AI response is then:
 
@@ -160,6 +189,8 @@ This ensures reliability even when AI output is inconsistent.
 Create a `.env` file inside the `server/` directory:
 
 ```env
+MONGO_URI=your_mongo_connection_string
+JWT_SECRET=your_secret_key
 GEMINI_API_KEY=your_gemini_api_key_here
 GEMINI_MODEL=gemini-2.5-flash
 ```
@@ -192,6 +223,41 @@ http://localhost:3000/dashboard
 
 ---
 
+## Usage Guide
+
+## Login/Register
+
+- Navigate to /
+
+- Register a new account or log in
+
+## Generate Recipes
+
+- Go to the dashboard page
+
+- Enter ingredients
+
+- Click Generate
+
+- View recipe cards returned by the AI model
+
+## Save Recipes
+
+- Click Save on a recipe card to store it for your account
+
+- View saved recipes on the Saved Recipes page
+
+## API Summary
+
+| Method | Endpoint                | Description                              |
+|--------|-------------------------|------------------------------------------|
+| POST   | `/api/auth/register`    | Register a new user                      |
+| POST   | `/api/auth/login`       | Authenticate user and return JWT         |
+| POST   | `/api/gemini/recipes`   | Generate AI-based recipe suggestions     |
+| POST   | `/api/recipes`          | Save a recipe to the user’s account      |
+| GET    | `/api/saved`            | Retrieve user’s saved recipes            |
+| DELETE | `/api/recipes/:id`      | Remove a saved recipe from the account   |
+
 ## Design Decisions
 
 ### Backend Proxy Pattern
@@ -216,7 +282,6 @@ The dashboard focuses only on ingredient input to:
 * Reduce error cases
 * Keep the feature intuitive and focused
 
----
 
 ## Error Handling & Reliability
 
@@ -224,7 +289,6 @@ The dashboard focuses only on ingredient input to:
 * Invalid AI output → graceful retry or failure
 * API or configuration errors → handled server-side
 
----
 
 ## Security Considerations
 
@@ -233,14 +297,55 @@ The dashboard focuses only on ingredient input to:
 * Controlled access via authentication
 * Clean input handling
 
----
 
-## Future Improvements
+## Automated Backend Testing (Gemini Recipe API)
 
-* Save generated recipes to the database (full CRUD)
-* User-specific recipe history
-* Rate limiting for API protection
-* Recipe filtering and preferences
-* Caching repeated requests
+This project includes automated backend tests for the Gemini recipe API using Jest and Supertest.
 
+The tests validate API behavior in isolation by mocking all external dependencies, ensuring fast, reliable, and repeatable test execution without requiring a database connection or real Gemini API calls.
 
+**What is tested**
+
+- API route availability
+
+- Successful recipe generation with valid input
+
+- Proper input validation and 400 error responses for invalid input
+
+- Response JSON structure for generated recipes
+
+**Testing approach**
+
+- Jest is used as the test runner
+
+- Supertest is used to simulate HTTP requests to the Express app
+
+- Gemini API calls are mocked by default
+
+- Database connections are mocked to avoid external dependencies
+
+**How to run the tests**
+
+From the project root:
+
+```
+npm install
+npm test
+```
+
+No environment variables, database, or Gemini API key are required to run the tests.
+
+**Test location**
+
+```
+tests/jest/gemini.recipes.test.js
+```
+
+**Expected output**
+
+```
+PASS  tests/jest/gemini.recipes.test.js
+ ✓ GET /api/gemini/health is available
+ ✓ POST /api/gemini/recipes returns expected structure for valid input
+ ✓ POST /api/gemini/recipes returns 400 for invalid input
+```
