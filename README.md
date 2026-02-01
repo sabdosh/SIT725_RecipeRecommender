@@ -36,7 +36,7 @@ This project demonstrates secure backend integration, clean architectural design
 * MongoDB connection via Mongoose
 
 **Folder Structure**
----
+```
 SIT725_RecipeRecommender/
 ├── client/
 │ ├── public/
@@ -56,7 +56,7 @@ SIT725_RecipeRecommender/
 │ ├── models/
 │ └── routes/
 └── README.md
----
+```
 
 
 **External Services**
