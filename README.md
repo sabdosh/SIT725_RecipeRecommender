@@ -16,6 +16,9 @@ This project demonstrates secure backend integration, clean architectural design
 * Structured recipe outputs rendered as user-friendly cards
 * MongoDB database connectivity for user management
 * Demo-ready, modular, and extensible design
+* User-scoped recipe persistence (JWT-protected endpoints)
+* Mock API mode for development and testing without external AI calls
+
 
 ---
 
@@ -78,6 +81,8 @@ The backend connects to a MongoDB database using **Mongoose**. This database sup
 * User account storage
 * Authentication workflows
 * Future persistence of generated recipes
+* User-scoped persistence of saved recipes
+
 
 ### Database Connection
 
@@ -93,7 +98,8 @@ Relevant file:
 
 ### Feature Description
 
-Users enter a list of ingredients on the dashboard. The system sends these ingredients to the backend, which calls the **Google Gemini API** to generate recipe suggestions.
+Users enter a list of ingredients on the dashboard. The system sends these ingredients to the backend, which calls the **Google Gemini API** to generate recipe suggestions. The dashboard also includes quick-add ingredient inputs to streamline validation and iteration.
+
 
 The AI response is then:
 
