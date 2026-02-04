@@ -36,6 +36,30 @@ This project demonstrates secure backend integration, clean architectural design
 * Gemini AI integration
 * MongoDB connection via Mongoose
 
+**Folder Structure**
+---
+SIT725_RecipeRecommender/
+├── client/
+│ ├── public/
+│ │ ├── index.html
+│ │ ├── dashboard.html
+│ │ ├── saved.html
+│ │ ├── styles.css
+│ │ ├── login-logic.js
+│ │ ├── dashboard-logic.js
+│ │ └── saved-logic.js
+│ └── ...
+├── server/
+│ ├── app.js
+│ ├── server.js
+│ ├── config/
+│ ├── middleware/
+│ ├── models/
+│ └── routes/
+└── README.md
+---
+
+
 **External Services**
 
 * Google Gemini API (AI generation)
@@ -166,6 +190,8 @@ This ensures reliability even when AI output is inconsistent.
 Create a `.env` file inside the `server/` directory:
 
 ```env
+MONGO_URI=your_mongo_connection_string
+JWT_SECRET=your_secret_key
 GEMINI_API_KEY=your_gemini_api_key_here
 GEMINI_MODEL=gemini-2.5-flash
 ```
@@ -197,6 +223,41 @@ http://localhost:3000/dashboard
 ```
 
 ---
+
+## Usage Gudie
+
+## Login/Register
+
+- Navigate to /
+
+- Register a new account or log in
+
+## Generate Recipes
+
+- Go to the dashboard page
+
+- Enter ingredients
+
+- Click Generate
+
+- View recipe cards returned by the AI model
+
+## Save Recipes
+
+- Click Save on a recipe card to store it for your account
+
+- View saved recipes on the Saved Recipes page
+
+## API Summary
+
+| Method | Endpoint                | Description                              |
+|--------|-------------------------|------------------------------------------|
+| POST   | `/api/auth/register`    | Register a new user                      |
+| POST   | `/api/auth/login`       | Authenticate user and return JWT         |
+| POST   | `/api/gemini/recipes`   | Generate AI-based recipe suggestions     |
+| POST   | `/api/recipes`          | Save a recipe to the user’s account      |
+| GET    | `/api/saved`            | Retrieve user’s saved recipes            |
+| DELETE | `/api/recipes/:id`      | Remove a saved recipe from the account   |
 
 ## Design Decisions
 
@@ -240,13 +301,5 @@ The dashboard focuses only on ingredient input to:
 * Clean input handling
 
 ---
-
-## Future Improvements
-
-* Save generated recipes to the database (full CRUD)
-* User-specific recipe history
-* Rate limiting for API protection
-* Recipe filtering and preferences
-* Caching repeated requests
 
 

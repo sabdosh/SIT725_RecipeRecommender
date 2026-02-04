@@ -173,9 +173,11 @@
     recipes.forEach((r) => {
       const key = (r.title || "").toString();
       if (key) recipeByTitle.set(key, r);
+      const rid = (r._id || r.id || "").toString();
 
       const card = document.createElement("article");
       card.className = "recipe-card";
+      if (rid) card.dataset.recipeId = rid;
 
       const time = r.estimated_time_minutes || 30;
       const servings = r.servings || 4;
@@ -210,6 +212,9 @@
             <a href="#" class="btn btn--primary" onclick="event.preventDefault(); showRecipeDetails('${escapeHtml(
               r.title || ""
             )}')">View Details</a>
+            <a href="#" class="btn btn--secondary" onclick="event.preventDefault(); removeSavedRecipe('${escapeHtml(
+              rid
+            )}')">Remove</a>
           </div>
         </div>
       `;
@@ -249,6 +254,59 @@ ${missing.join(", ")}
 Optional Additions:
 ${optional.join(", ")}`
     );
+  };
+
+  window.removeSavedRecipe = async function (recipeId) {
+    if (!recipeId) return;
+
+    const card = document.querySelector(`[data-recipe-id="${recipeId}"]`);
+    const parent = card ? card.parentNode : null;
+    const next = card ? card.nextSibling : null;
+
+    let removedKey = null;
+    let removedRecipe = null;
+
+    for (const [k, v] of recipeByTitle.entries()) {
+      const rid = (v?._id || v?.id || "").toString();
+      if (rid === recipeId) {
+        removedKey = k;
+        removedRecipe = v;
+        recipeByTitle.delete(k);
+        break;
+      }
+    }
+
+    if (card) card.remove();
+
+    if (savedGridEl && savedGridEl.children.length === 0) {
+      setVisible(emptyStateEl, true);
+      setVisible(savedSectionEl, false);
+    }
+
+    try {
+      const res = await fetch(`/api/recipes/${encodeURIComponent(recipeId)}`, {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      const data = await res.json().catch(() => null);
+      if (!res.ok || !data?.ok) {
+        throw new Error(data?.error || `Request failed (${res.status})`);
+      }
+    } catch (err) {
+      if (parent && card) {
+        if (next) parent.insertBefore(card, next);
+        else parent.appendChild(card);
+      }
+      if (removedKey) recipeByTitle.set(removedKey, removedRecipe);
+      if (savedGridEl && savedGridEl.children.length > 0) {
+        setVisible(emptyStateEl, false);
+        setVisible(savedSectionEl, true);
+      }
+      alert("Unable to remove recipe.");
+    }
   };
 
   const token =
