@@ -10,14 +10,15 @@ This project demonstrates secure backend integration, clean architectural design
 
 ## Key Features
 
-* User authentication (login & registration)
-* Secure backend API using Express
-* AI-powered recipe generation using Google Gemini
-* Structured recipe outputs rendered as user-friendly cards
-* MongoDB database connectivity for user management
-* Demo-ready, modular, and extensible design
-* User-scoped recipe persistence (JWT-protected endpoints)
-
+- User authentication (login & registration)
+- Secure backend API using Express
+- AI-powered recipe generation using Google Gemini
+- Structured recipe outputs rendered as user-friendly cards
+- MongoDB database connectivity for user management
+- Demo-ready, modular, and extensible design
+- User-scoped recipe persistence (JWT-protected endpoints)
+- Persistent saved recipes restored across user login sessions
+- Saved recipes accessible via a dedicated Saved Recipes dashboard
 
 ---
 
@@ -25,17 +26,18 @@ This project demonstrates secure backend integration, clean architectural design
 
 **Frontend**
 
-* Login & dashboard UI (HTML, CSS, JavaScript)
-* Dynamic rendering of recipe suggestions
+- Login & dashboard UI (HTML, CSS, JavaScript)
+- Dynamic rendering of recipe suggestions
 
 **Backend**
 
-* Express server
-* REST API endpoints
-* Gemini AI integration
-* MongoDB connection via Mongoose
+- Express server
+- REST API endpoints
+- Gemini AI integration
+- MongoDB connection via Mongoose
 
 **Folder Structure**
+
 ```
 SIT725_RecipeRecommender/
 ├── client/
@@ -58,11 +60,10 @@ SIT725_RecipeRecommender/
 └── README.md
 ```
 
-
 **External Services**
 
-* Google Gemini API (AI generation)
-* MongoDB Atlas (database)
+- Google Gemini API (AI generation)
+- MongoDB Atlas (database)
 
 ---
 
@@ -87,13 +88,13 @@ The application includes a login interface that restricts access to the dashboar
 
 ### Login Interface
 
-* Users log in using a username and password
-* Credentials are submitted to backend authentication endpoints
-* Authentication ensures controlled access to application features
+- Users log in using a username and password
+- Credentials are submitted to backend authentication endpoints
+- Authentication ensures controlled access to application features
 
 Relevant file:
 
-* `client/public/index.html`
+- `client/public/index.html`
 
 ---
 
@@ -101,11 +102,10 @@ Relevant file:
 
 The backend connects to a MongoDB database using **Mongoose**. This database supports:
 
-* User account storage
-* Authentication workflows
-* Future persistence of generated recipes
-* User-scoped persistence of saved recipes
-
+- User account storage
+- Authentication workflows
+- Future persistence of generated recipes
+- User-scoped persistence of saved recipes
 
 ### Database Connection
 
@@ -113,7 +113,7 @@ The database connection is initialised when the server starts. If the connection
 
 Relevant file:
 
-* `server/config/authDB.js`
+- `server/config/authDB.js`
 
 ---
 
@@ -123,12 +123,11 @@ Relevant file:
 
 Users enter a list of ingredients on the dashboard. The system sends these ingredients to the backend, which calls the **Google Gemini API** to generate recipe suggestions. The dashboard also includes quick-add ingredient inputs to streamline validation and iteration.
 
-
 The AI response is then:
 
-* Cleaned
-* Validated
-* Normalised into a strict JSON schema
+- Cleaned
+- Validated
+- Normalised into a strict JSON schema
 
 This ensures the frontend always receives **structured, predictable data**.
 
@@ -169,14 +168,13 @@ This ensures the frontend always receives **structured, predictable data**.
 
 ## Gemini Integration Details
 
-* The Gemini API is accessed **only from the backend**
-* API keys are stored securely using environment variables
-* The backend enforces a strict JSON schema
-* If Gemini returns malformed output, the service:
-
-  * Extracts valid JSON blocks
-  * Cleans formatting issues
-  * Uses a fallback “repair” pass if required
+- The Gemini API is accessed **only from the backend**
+- API keys are stored securely using environment variables
+- The backend enforces a strict JSON schema
+- If Gemini returns malformed output, the service:
+  - Extracts valid JSON blocks
+  - Cleans formatting issues
+  - Uses a fallback “repair” pass if required
 
 This ensures reliability even when AI output is inconsistent.
 
@@ -249,14 +247,14 @@ http://localhost:3000/dashboard
 
 ## API Summary
 
-| Method | Endpoint                | Description                              |
-|--------|-------------------------|------------------------------------------|
-| POST   | `/api/auth/register`    | Register a new user                      |
-| POST   | `/api/auth/login`       | Authenticate user and return JWT         |
-| POST   | `/api/gemini/recipes`   | Generate AI-based recipe suggestions     |
-| POST   | `/api/recipes`          | Save a recipe to the user’s account      |
-| GET    | `/api/saved`            | Retrieve user’s saved recipes            |
-| DELETE | `/api/recipes/:id`      | Remove a saved recipe from the account   |
+| Method | Endpoint              | Description                            |
+| ------ | --------------------- | -------------------------------------- |
+| POST   | `/api/auth/register`  | Register a new user                    |
+| POST   | `/api/auth/login`     | Authenticate user and return JWT       |
+| POST   | `/api/gemini/recipes` | Generate AI-based recipe suggestions   |
+| POST   | `/api/recipes`        | Save a recipe to the user’s account    |
+| GET    | `/api/saved`          | Retrieve user’s saved recipes          |
+| DELETE | `/api/recipes/:id`    | Remove a saved recipe from the account |
 
 ## Design Decisions
 
@@ -264,39 +262,36 @@ http://localhost:3000/dashboard
 
 The Gemini API is called from the backend to:
 
-* Protect API keys
-* Control and validate AI responses
-* Centralise error handling
+- Protect API keys
+- Control and validate AI responses
+- Centralise error handling
 
 ### Separation of Concerns
 
-* Routes handle endpoints
-* Controllers manage request/response flow
-* Services contain business logic and external API calls
+- Routes handle endpoints
+- Controllers manage request/response flow
+- Services contain business logic and external API calls
 
 ### Simplified UI
 
 The dashboard focuses only on ingredient input to:
 
-* Improve usability
-* Reduce error cases
-* Keep the feature intuitive and focused
-
+- Improve usability
+- Reduce error cases
+- Keep the feature intuitive and focused
 
 ## Error Handling & Reliability
 
-* Missing input → user-friendly error messages
-* Invalid AI output → graceful retry or failure
-* API or configuration errors → handled server-side
-
+- Missing input → user-friendly error messages
+- Invalid AI output → graceful retry or failure
+- API or configuration errors → handled server-side
 
 ## Security Considerations
 
-* API keys never exposed to the client
-* `.env` files excluded from Git
-* Controlled access via authentication
-* Clean input handling
-
+- API keys never exposed to the client
+- `.env` files excluded from Git
+- Controlled access via authentication
+- Clean input handling
 
 ## Automated Backend Testing (Gemini Recipe API)
 
