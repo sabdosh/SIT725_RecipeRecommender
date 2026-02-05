@@ -373,3 +373,210 @@ body {
   font-weight: 600;
   margin: 0 0 16px 0;
 }
+
+/*sihams changes 
+/* ===== Recipe Details Modal (Figma-style) ===== */
+.modalOverlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.65);
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+
+.modalBox {
+  background: #fff;
+  border-radius: 14px;
+  width: min(980px, 100%);
+  max-height: min(86vh, 900px);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.35);
+}
+
+.modalHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 14px 8px 14px;
+}
+
+.modalBack {
+  border: 0;
+  background: transparent;
+  color: #64748b;
+  cursor: pointer;
+  font-weight: 600;
+}
+.modalBack:hover { color: #0f172a; }
+
+.modalClose {
+  border: 0;
+  background: transparent;
+  font-size: 28px;
+  line-height: 28px;
+  cursor: pointer;
+  padding: 6px 10px;
+}
+
+.modalBody {
+  padding: 18px 22px 22px 22px;
+  overflow: auto;
+}
+
+.modalHero {
+  height: 220px;
+  background: #e5e7eb;
+  border-radius: 12px;
+  margin-bottom: 18px;
+}
+
+.modalTitle {
+  margin: 0 0 6px;
+  font-size: 36px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+
+.modalMeta {
+  margin: 0 0 18px;
+  color: #64748b;
+  font-size: 14px;
+}
+
+.modalSection {
+  padding-top: 14px;
+  border-top: 1px solid #e2e8f0;
+  margin-top: 14px;
+}
+
+.modalSectionTitle {
+  margin: 0 0 12px;
+  font-size: 18px;
+  font-weight: 750;
+}
+
+.modalIngredients {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  gap: 10px;
+}
+
+.modalIngredientItem {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 15px;
+}
+
+.modalBadge {
+  width: 22px;
+  height: 22px;
+  border-radius: 4px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 900;
+  font-size: 12px;
+  border: 1px solid transparent;
+  flex: 0 0 auto;
+}
+
+.modalBadge.isOk {
+  color: #16a34a;
+  background: #dcfce7;
+  border-color: rgba(22, 163, 74, 0.25);
+}
+
+.modalBadge.isMissing {
+  color: #dc2626;
+  background: #fee2e2;
+  border-color: rgba(220, 38, 38, 0.25);
+}
+
+.modalMissingTag {
+  color: #dc2626;
+  font-size: 13px;
+  margin-left: 6px;
+}
+
+.modalSteps {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  gap: 12px;
+}
+
+.modalStep {
+  display: grid;
+  grid-template-columns: 34px 1fr;
+  gap: 12px;
+  align-items: start;
+}
+
+.modalStepNum {
+  width: 34px;
+  height: 34px;
+  border-radius: 999px;
+  background: #2563eb;
+  color: #fff;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 900;
+  font-size: 14px;
+}
+
+.modalStepText {
+  color: #334155;
+  line-height: 1.5;
+  font-size: 15px;
+}
+
+.modalPills {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.modalPill {
+  border: 1px solid #e2e8f0;
+  background: #f8fafc;
+  padding: 6px 10px;
+  border-radius: 999px;
+  font-size: 13px;
+  color: #334155;
+}
+
+.modalFooter {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-top: 18px;
+}
+
+.modalBtn {
+  height: 44px;
+  border-radius: 10px;
+  border: 1px solid #e2e8f0;
+  background: #fff;
+  cursor: pointer;
+  font-weight: 700;
+}
+
+.modalBtnPrimary {
+  background: #2563eb;
+  border-color: #2563eb;
+  color: #fff;
+}
+.modalBtnPrimary:hover { background: #1d4ed8; }

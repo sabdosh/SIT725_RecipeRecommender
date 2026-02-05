@@ -31,6 +31,7 @@
       .replaceAll("'", "&#039;");
   }
 
+  // Kept for safety fallback (unchanged behaviour if recipe not found)
   function showTextModal(text) {
     const existing = document.getElementById("recipeDetailsModal");
     if (existing) existing.remove();
@@ -166,6 +167,222 @@
     return [String(v).trim()].filter(Boolean);
   }
 
+  // --- Match dashboard modal behaviour (same classes/styles) ---
+  function formatStep(step) {
+    if (!step) return "";
+    let s = String(step).trim();
+    if (!s) return "";
+
+    // Capitalise first letter
+    s = s.charAt(0).toUpperCase() + s.slice(1);
+
+    // Add full stop if missing
+    if (!/[.!?]$/.test(s)) s += ".";
+
+    return s;
+  }
+
+  function openRecipeModalSaved(recipe) {
+    const existing = document.getElementById("recipeDetailsModal");
+    if (existing) existing.remove();
+
+    const overlay = document.createElement("div");
+    overlay.id = "recipeDetailsModal";
+    overlay.className = "modalOverlay";
+
+    const box = document.createElement("div");
+    box.className = "modalBox";
+
+    const header = document.createElement("div");
+    header.className = "modalHeader";
+
+    const backBtn = document.createElement("button");
+    backBtn.type = "button";
+    backBtn.className = "modalBack";
+    backBtn.textContent = "← Back";
+
+    const closeBtn = document.createElement("button");
+    closeBtn.type = "button";
+    closeBtn.className = "modalClose";
+    closeBtn.textContent = "×";
+
+    header.appendChild(backBtn);
+    header.appendChild(closeBtn);
+
+    const body = document.createElement("div");
+    body.className = "modalBody";
+
+    // Title
+    const title = document.createElement("h2");
+    title.className = "modalTitle";
+    title.textContent = recipe.title || "Recipe";
+
+    // Meta
+    const meta = document.createElement("p");
+    meta.className = "modalMeta";
+    const time = recipe.estimated_time_minutes || recipe.time || "";
+    const servings = recipe.servings || "";
+    meta.textContent = [time ? `${time} min` : "", servings ? `${servings} servings` : ""]
+      .filter(Boolean)
+      .join(" • ");
+
+    const hero = document.createElement("div");
+    hero.className = "modalHero";
+
+ // ---- Ingredients section ----
+const ingredientsSection = document.createElement("section");
+ingredientsSection.className = "modalSection";
+
+const ingHeading = document.createElement("h3");
+ingHeading.className = "modalSectionTitle";
+ingHeading.textContent = "Ingredients";
+
+const ingList = document.createElement("ul");
+ingList.className = "modalIngredients";
+
+// In saved recipes, ingredients = what the recipe requires
+const ingredients = normalizeList(
+  recipe.ingredients ??
+    recipe.ingredientsList ??
+    recipe.ingredient_list ??
+    recipe.ingredientList ??
+    recipe.ingredients_used ??
+    recipe.usedIngredients ??
+    recipe.missing_ingredients ??
+    recipe.missingIngredients ??
+    recipe.missing
+)
+  .map((x) => String(x).trim())
+  .filter(Boolean);
+
+// Deduplicate
+const seen = new Set();
+const uniqueIngredients = [];
+for (const item of ingredients) {
+  const key = item.toLowerCase();
+  if (seen.has(key)) continue;
+  seen.add(key);
+  uniqueIngredients.push(item);
+}
+
+// Render plain bullets
+uniqueIngredients.forEach((line) => {
+  const li = document.createElement("li");
+  li.textContent = line;
+  ingList.appendChild(li);
+});
+
+if (!uniqueIngredients.length) {
+  const empty = document.createElement("li");
+  empty.textContent = "No ingredients available for this recipe.";
+  ingList.appendChild(empty);
+}
+
+ingredientsSection.appendChild(ingHeading);
+ingredientsSection.appendChild(ingList);
+
+    // ---- Instructions section ----
+    const instructionsSection = document.createElement("section");
+    instructionsSection.className = "modalSection";
+
+    const stepHeading = document.createElement("h3");
+    stepHeading.className = "modalSectionTitle";
+    stepHeading.textContent = "Instructions";
+
+    const stepsList = document.createElement("ol");
+    stepsList.className = "modalSteps";
+
+    const steps = normalizeList(recipe.steps ?? recipe.instructions ?? recipe.method);
+
+    steps.forEach((s, i) => {
+      const li = document.createElement("li");
+      li.className = "modalStep";
+
+      const num = document.createElement("span");
+      num.className = "modalStepNum";
+      num.textContent = String(i + 1);
+
+      const txt = document.createElement("div");
+      txt.className = "modalStepText";
+      txt.textContent = formatStep(s);
+
+      li.appendChild(num);
+      li.appendChild(txt);
+      stepsList.appendChild(li);
+    });
+
+    instructionsSection.appendChild(stepHeading);
+    instructionsSection.appendChild(stepsList);
+
+    // ---- Optional additions ----
+    const optional = normalizeList(
+      recipe.optional_additions ?? recipe.optionalAdditions ?? recipe.optional
+    );
+
+    let optionalSection = null;
+    if (optional.length) {
+      optionalSection = document.createElement("section");
+      optionalSection.className = "modalSection";
+
+      const optHeading = document.createElement("h3");
+      optHeading.className = "modalSectionTitle";
+      optHeading.textContent = "Optional Additions";
+
+      const optList = document.createElement("ul");
+      optList.className = "modalPills";
+
+      optional.forEach((o) => {
+        const pill = document.createElement("li");
+        pill.className = "modalPill";
+        pill.textContent = o;
+        optList.appendChild(pill);
+      });
+
+      optionalSection.appendChild(optHeading);
+      optionalSection.appendChild(optList);
+    }
+
+    // Footer (matches dashboard layout style)
+    const footer = document.createElement("div");
+    footer.className = "modalFooter";
+
+    const backBtn2 = document.createElement("button");
+    backBtn2.type = "button";
+    backBtn2.className = "modalBtn";
+    backBtn2.textContent = "Back to Saved";
+
+    footer.appendChild(backBtn2);
+
+    body.appendChild(hero);
+    body.appendChild(title);
+    if (meta.textContent) body.appendChild(meta);
+    body.appendChild(ingredientsSection);
+    body.appendChild(instructionsSection);
+    if (optionalSection) body.appendChild(optionalSection);
+    body.appendChild(footer);
+
+    function close() {
+      overlay.remove();
+      document.removeEventListener("keydown", onKey);
+    }
+    function onKey(e) {
+      if (e.key === "Escape") close();
+    }
+
+    closeBtn.addEventListener("click", close);
+    backBtn.addEventListener("click", close);
+    backBtn2.addEventListener("click", close);
+    overlay.addEventListener("click", (e) => {
+      if (e.target === overlay) close();
+    });
+    document.addEventListener("keydown", onKey);
+
+    box.appendChild(header);
+    box.appendChild(body);
+    overlay.appendChild(box);
+    document.body.appendChild(overlay);
+  }
+
   function renderRecipes(recipes) {
     savedGridEl.innerHTML = "";
     recipeByTitle.clear();
@@ -223,6 +440,7 @@
     });
   }
 
+  // Uses new modal UI (same as dashboard). Keeps showTextModal only as fallback.
   window.showRecipeDetails = function (recipeTitle) {
     const r = recipeByTitle.get(recipeTitle);
 
@@ -231,29 +449,9 @@
       return;
     }
 
-    const steps = normalizeList(r.steps ?? r.instructions ?? r.method);
-    const ingredients = normalizeList(
-      r.ingredients ?? r.ingredientList
-    );
-    const missing = normalizeList(
-      r.missing_ingredients ?? r.missingIngredients ?? r.missing
-    );
-    const optional = normalizeList(
-      r.optional_additions ?? r.optionalAdditions ?? r.optional
-    );
+    openRecipeModalSaved(r);
+    console.log("Saved recipe object:", r);
 
-    showTextModal(
-      `Recipe: ${r.title || recipeTitle}
-
-Steps:
-${steps.join("\n")}
-
-Missing Ingredients:
-${missing.join(", ")}
-
-Optional Additions:
-${optional.join(", ")}`
-    );
   };
 
   window.removeSavedRecipe = async function (recipeId) {
@@ -309,8 +507,7 @@ ${optional.join(", ")}`
     }
   };
 
-  const token =
-    localStorage.getItem("token") || localStorage.getItem("auth_token");
+  const token = localStorage.getItem("token") || localStorage.getItem("auth_token");
 
   if (!token) {
     setVisible(emptyStateEl, true);

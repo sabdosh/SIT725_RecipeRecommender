@@ -44,80 +44,6 @@
         .replaceAll("'", "&#039;");
     }
 
-    function showTextModal(text) {
-      const existing = document.getElementById("recipeDetailsModal");
-      if (existing) existing.remove();
-
-      const overlay = document.createElement("div");
-      overlay.id = "recipeDetailsModal";
-      overlay.style.position = "fixed";
-      overlay.style.inset = "0";
-      overlay.style.background = "rgba(0,0,0,0.65)";
-      overlay.style.zIndex = "9999";
-      overlay.style.display = "flex";
-      overlay.style.alignItems = "center";
-      overlay.style.justifyContent = "center";
-      overlay.style.padding = "24px";
-
-      const box = document.createElement("div");
-      box.style.background = "#fff";
-      box.style.borderRadius = "12px";
-      box.style.width = "min(900px, 100%)";
-      box.style.maxHeight = "min(80vh, 900px)";
-      box.style.display = "flex";
-      box.style.flexDirection = "column";
-      box.style.boxShadow = "0 20px 60px rgba(0,0,0,0.35)";
-      box.style.overflow = "hidden";
-
-      const header = document.createElement("div");
-      header.style.display = "flex";
-      header.style.alignItems = "center";
-      header.style.justifyContent = "flex-end";
-      header.style.padding = "12px 12px 0 12px";
-
-      const closeBtn = document.createElement("button");
-      closeBtn.type = "button";
-      closeBtn.textContent = "×";
-      closeBtn.style.border = "none";
-      closeBtn.style.background = "transparent";
-      closeBtn.style.fontSize = "28px";
-      closeBtn.style.lineHeight = "28px";
-      closeBtn.style.cursor = "pointer";
-      closeBtn.style.padding = "6px 10px";
-
-      const body = document.createElement("pre");
-      body.style.margin = "0";
-      body.style.padding = "12px 16px 18px 16px";
-      body.style.whiteSpace = "pre-wrap";
-      body.style.wordBreak = "break-word";
-      body.style.overflow = "auto";
-      body.style.fontFamily = "inherit";
-      body.style.fontSize = "14px";
-      body.style.lineHeight = "1.5";
-      body.textContent = text || "";
-
-      function close() {
-        overlay.remove();
-        document.removeEventListener("keydown", onKey);
-      }
-
-      function onKey(e) {
-        if (e.key === "Escape") close();
-      }
-
-      closeBtn.addEventListener("click", close);
-      overlay.addEventListener("click", function (e) {
-        if (e.target === overlay) close();
-      });
-      document.addEventListener("keydown", onKey);
-
-      header.appendChild(closeBtn);
-      box.appendChild(header);
-      box.appendChild(body);
-      overlay.appendChild(box);
-      document.body.appendChild(overlay);
-    }
-
     function normalizeList(v) {
       if (v == null) return [];
 
@@ -155,6 +81,7 @@
           return normalizeList(container);
         }
 
+
         const name =
           v.name ??
           v.item ??
@@ -172,6 +99,309 @@
 
       return [String(v).trim()].filter(Boolean);
     }
+function formatStep(step) {
+  if (!step) return "";
+
+  let s = String(step).trim();
+
+  // Capitalise first letter
+  s = s.charAt(0).toUpperCase() + s.slice(1);
+
+  // Add full stop if missing
+  if (!/[.!?]$/.test(s)) {
+    s += ".";
+  }
+
+  return s;
+}
+    // ---------------------------
+    // MODAL (structured like Figma)
+    // ---------------------------
+    function openRecipeModal(recipe, userIngredients = []) {
+      const existing = document.getElementById("recipeDetailsModal");
+      if (existing) existing.remove();
+
+      const overlay = document.createElement("div");
+      overlay.id = "recipeDetailsModal";
+      overlay.className = "modalOverlay";
+
+      const box = document.createElement("div");
+      box.className = "modalBox";
+
+      const header = document.createElement("div");
+      header.className = "modalHeader";
+
+      const backBtn = document.createElement("button");
+      backBtn.type = "button";
+      backBtn.className = "modalBack";
+      backBtn.textContent = "← Back";
+
+      const closeBtn = document.createElement("button");
+      closeBtn.type = "button";
+      closeBtn.className = "modalClose";
+      closeBtn.textContent = "×";
+
+      header.appendChild(backBtn);
+      header.appendChild(closeBtn);
+
+      const body = document.createElement("div");
+      body.className = "modalBody";
+
+      // ---- Title / Meta ----
+      const title = document.createElement("h2");
+      title.className = "modalTitle";
+      title.textContent = recipe.title || "Recipe";
+
+      const meta = document.createElement("p");
+      meta.className = "modalMeta";
+      const time = recipe.estimated_time_minutes || recipe.time || "";
+      const servings = recipe.servings || "";
+      meta.textContent = [time ? `${time} min` : "", servings ? `${servings} servings` : ""]
+        .filter(Boolean)
+        .join(" • ");
+
+      const hero = document.createElement("div");
+      hero.className = "modalHero";
+
+      // ---- Ingredients section ----
+      const ingredientsSection = document.createElement("section");
+      ingredientsSection.className = "modalSection";
+
+      const ingHeading = document.createElement("h3");
+      ingHeading.className = "modalSectionTitle";
+      ingHeading.textContent = "Ingredients";
+
+      const ingList = document.createElement("ul");
+      ingList.className = "modalIngredients";
+
+      // 1) User typed ingredients = ALWAYS AVAILABLE (never missing)
+      const userList = (Array.isArray(userIngredients) ? userIngredients : [])
+        .map((x) => String(x).trim())
+        .filter(Boolean);
+
+      const availableSet = new Set(userList.map((x) => x.toLowerCase()));
+
+      // 2) Recipe ingredients (whatever the model returns)
+      const recipeList = normalizeList(
+        recipe.ingredients ??
+          recipe.ingredientsList ??
+          recipe.ingredient_list ??
+          recipe.ingredientList ??
+          recipe.ingredients_used ??
+          recipe.ingredientsUsed ??
+          recipe.used_ingredients ??
+          recipe.usedIngredients
+      )
+        .map((x) => String(x).trim())
+        .filter(Boolean);
+
+      // 3) Missing ingredients returned by model
+      const missingList = normalizeList(
+        recipe.missing_ingredients ?? recipe.missingIngredients ?? recipe.missing
+      )
+        .map((x) => String(x).trim())
+        .filter(Boolean);
+
+      const missingSet = new Set(missingList.map((x) => x.toLowerCase()));
+
+      // Helper: does this ingredient look like something the user has?
+      // (handles "onion" vs "onions", "garlic" inside longer lines, etc.)
+      function isUserAvailable(label) {
+        const low = String(label).toLowerCase();
+
+        // exact match
+        if (availableSet.has(low)) return true;
+
+        // partial match either direction
+        for (const a of availableSet) {
+          if (!a) continue;
+          if (low.includes(a) || a.includes(low)) return true;
+        }
+        return false;
+      }
+
+      // Helper: is it missing?
+      // Missing only if model says missing AND user did NOT type it.
+      function isMissingIngredient(label) {
+        const low = String(label).toLowerCase();
+
+        const modelSaysMissing =
+          missingSet.has(low) ||
+          [...missingSet].some((m) => m && (low.includes(m) || m.includes(low)));
+
+        if (!modelSaysMissing) return false;
+
+        // user typed it => NOT missing
+        if (isUserAvailable(label)) return false;
+
+        return true;
+      }
+
+      // Combine ALL ingredients (user + recipe + missing), de-dupe
+      const all = [];
+      const seen = new Set();
+
+      function addUnique(item) {
+        const clean = String(item).trim();
+        if (!clean) return;
+        const key = clean.toLowerCase();
+        if (seen.has(key)) return;
+        seen.add(key);
+        all.push(clean);
+      }
+
+      userList.forEach(addUnique);
+      recipeList.forEach(addUnique);
+      missingList.forEach(addUnique);
+
+      // Render ALL with ✅/❌
+      all.forEach((line) => {
+        const missing = isMissingIngredient(line);
+
+        const li = document.createElement("li");
+        li.className = "modalIngredientItem";
+
+        const badge = document.createElement("span");
+        badge.className = "modalBadge " + (missing ? "isMissing" : "isOk");
+        badge.textContent = missing ? "✕" : "✓";
+
+        const text = document.createElement("span");
+        text.className = "modalIngredientText";
+        text.textContent = line;
+
+        li.appendChild(badge);
+        li.appendChild(text);
+
+        if (missing) {
+          const miss = document.createElement("span");
+          miss.className = "modalMissingTag";
+          miss.textContent = "(Missing)";
+          li.appendChild(miss);
+        }
+
+        ingList.appendChild(li);
+      });
+
+      if (!all.length) {
+        const empty = document.createElement("li");
+        empty.className = "modalIngredientItem";
+        empty.textContent = "No ingredients available for this recipe.";
+        ingList.appendChild(empty);
+      }
+
+      ingredientsSection.appendChild(ingHeading);
+      ingredientsSection.appendChild(ingList);
+
+      // ---- Instructions section ----
+      const instructionsSection = document.createElement("section");
+      instructionsSection.className = "modalSection";
+
+      const stepHeading = document.createElement("h3");
+      stepHeading.className = "modalSectionTitle";
+      stepHeading.textContent = "Instructions";
+
+      const stepsList = document.createElement("ol");
+      stepsList.className = "modalSteps";
+
+      const steps = normalizeList(
+  recipe.steps ?? recipe.instructions ?? recipe.method
+);
+
+steps.forEach((s, i) => {
+  const li = document.createElement("li");
+  li.className = "modalStep";
+
+  const num = document.createElement("span");
+  num.className = "modalStepNum";
+  num.textContent = String(i + 1);
+
+  const txt = document.createElement("div");
+  txt.className = "modalStepText";
+  txt.textContent = formatStep(s); // 👈 FIX HERE
+
+  li.appendChild(num);
+  li.appendChild(txt);
+  stepsList.appendChild(li);
+});
+
+
+      instructionsSection.appendChild(stepHeading);
+      instructionsSection.appendChild(stepsList);
+
+      // Optional additions (only show if exists)
+      const optional = normalizeList(
+        recipe.optional_additions ?? recipe.optionalAdditions ?? recipe.optional
+      );
+      let optionalSection = null;
+      if (optional.length) {
+        optionalSection = document.createElement("section");
+        optionalSection.className = "modalSection";
+
+        const optHeading = document.createElement("h3");
+        optHeading.className = "modalSectionTitle";
+        optHeading.textContent = "Optional Additions";
+
+        const optList = document.createElement("ul");
+        optList.className = "modalPills";
+
+        optional.forEach((o) => {
+          const pill = document.createElement("li");
+          pill.className = "modalPill";
+          pill.textContent = o;
+          optList.appendChild(pill);
+        });
+
+        optionalSection.appendChild(optHeading);
+        optionalSection.appendChild(optList);
+      }
+
+      // Footer
+      const footer = document.createElement("div");
+      footer.className = "modalFooter";
+
+      const saveBtn = document.createElement("button");
+      saveBtn.type = "button";
+      saveBtn.className = "modalBtn modalBtnPrimary";
+      saveBtn.textContent = "Save Recipe";
+      saveBtn.addEventListener("click", () => window.saveRecipe(recipe.title || ""));
+
+      const backBtn2 = document.createElement("button");
+      backBtn2.type = "button";
+      backBtn2.className = "modalBtn";
+      backBtn2.textContent = "Back to Results";
+
+      footer.appendChild(saveBtn);
+      footer.appendChild(backBtn2);
+
+      body.appendChild(hero);
+      body.appendChild(title);
+      if (meta.textContent) body.appendChild(meta);
+      body.appendChild(ingredientsSection);
+      body.appendChild(instructionsSection);
+      if (optionalSection) body.appendChild(optionalSection);
+      body.appendChild(footer);
+
+      function close() {
+        overlay.remove();
+        document.removeEventListener("keydown", onKey);
+      }
+      function onKey(e) {
+        if (e.key === "Escape") close();
+      }
+
+      closeBtn.addEventListener("click", close);
+      backBtn.addEventListener("click", close);
+      backBtn2.addEventListener("click", close);
+      overlay.addEventListener("click", (e) => {
+        if (e.target === overlay) close();
+      });
+      document.addEventListener("keydown", onKey);
+
+      box.appendChild(header);
+      box.appendChild(body);
+      overlay.appendChild(box);
+      document.body.appendChild(overlay);
+    }
 
     function renderRecipes(recipes) {
       resultsEl.innerHTML = "";
@@ -181,6 +411,7 @@
       for (const r of recipes) {
         const key = (r.title || "").toString();
         if (key) recipeByTitle.set(key, r);
+
         const card = document.createElement("article");
         card.className = "recipe-card";
 
@@ -229,9 +460,7 @@
     }
 
     function getAuthToken() {
-      return (
-        localStorage.getItem("token") || localStorage.getItem("auth_token") || ""
-      );
+      return localStorage.getItem("token") || localStorage.getItem("auth_token") || "";
     }
 
     async function persistRecipe(recipe) {
@@ -268,47 +497,20 @@
       await Promise.allSettled(list.map((r) => persistRecipe(r)));
     }
 
+    // ===============================
+    // View Recipe Details (NEW MODAL)
+    // ===============================
     window.showRecipeDetails = function (recipeTitle) {
       const r = recipeByTitle.get(recipeTitle);
+      if (!r) return;
 
-      if (!r) {
-        showTextModal("Details for: " + recipeTitle);
-        return;
-      }
+      const raw = (ingredientsEl.value || "").trim();
+      const userIngredients = raw
+        .split(/,|\n/)
+        .map((s) => s.trim())
+        .filter(Boolean);
 
-      const steps = normalizeList(r.steps ?? r.instructions ?? r.method);
-      const ingredients = normalizeList(
-        r.ingredients ??
-          r.ingredients_used ??
-          r.ingredientsUsed ??
-          r.used_ingredients ??
-          r.usedIngredients ??
-          r.usedIngredientsList ??
-          r.ingredients_needed ??
-          r.ingredientsNeeded ??
-          r.ingredientsList ??
-          r.ingredient_list ??
-          r.ingredientList
-      );
-      const missing = normalizeList(
-        r.missing_ingredients ?? r.missingIngredients ?? r.missing
-      );
-      const optional = normalizeList(
-        r.optional_additions ?? r.optionalAdditions ?? r.optional
-      );
-
-      showTextModal(
-        `Recipe: ${r.title || recipeTitle}
-
-Steps:
-${steps.join("\n")}
-
-Missing Ingredients:
-${missing.join(", ")}
-
-Optional Additions:
-${optional.join(", ")}`
-      );
+      openRecipeModal(r, userIngredients);
     };
 
     window.saveRecipe = async function (recipeTitle) {
