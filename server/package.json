@@ -4,9 +4,9 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-  "test": "jest --runInBand",
-  "test:e2e": "playwright test",
-  "test:all": "npm test && npm run test:e2e"
+    "test": "jest --runInBand",
+    "test:e2e": "playwright test",
+    "test:all": "npm test && npm run test:e2e"
   },
   "keywords": [],
   "author": "",
@@ -19,7 +19,8 @@
     "express": "^5.2.1",
     "jsonwebtoken": "^9.0.3",
     "mongoose": "^9.1.2",
-    "path": "^0.12.7"
+    "path": "^0.12.7",
+    "socket.io": "^4.8.1"
   },
   "devDependencies": {
     "jest": "^29.7.0",

@@ -56,7 +56,6 @@ app.post("/api/auth/register", async (req, res) => {
 
     const hashed = await bcrypt.hash(password, 10);
 
-    // IMPORTANT: capture the created user doc so you can sign a token
     const created = await User.create({ username, password: hashed });
 
     const token = jwt.sign(
@@ -96,6 +95,7 @@ app.post("/api/auth/login", async (req, res) => {
   return res.status(500).json({ message: "Server error", error: err.message });
 }
 });
+
 function validateRecipePayload(body) {
   const errors = [];
 
@@ -104,12 +104,10 @@ function validateRecipePayload(body) {
     return errors;
   }
 
-  // required: title only
   if (typeof body.title !== "string" || body.title.trim().length === 0) {
     errors.push("title is required and must be a non-empty string.");
   }
 
-  // optional fields: validate type only if present
   if (body.why_it_fits !== undefined && typeof body.why_it_fits !== "string") {
     errors.push("why_it_fits must be a string.");
   }
@@ -144,7 +142,6 @@ function validateRecipePayload(body) {
   return errors;
 }
 
-// assumes your auth middleware sets req.user = { userId, username, iat, exp }
 app.post("/api/recipes", auth, async (req, res) => {
   const errors = validateRecipePayload(req.body);
   if (errors.length) {
@@ -165,10 +162,19 @@ app.post("/api/recipes", auth, async (req, res) => {
       why_it_fits: req.body.why_it_fits ?? "",
       missing_ingredients: req.body.missing_ingredients ?? [],
       estimated_time_minutes: req.body.estimated_time_minutes ?? 0,
-      difficulty: req.body.difficulty, // optional
+      difficulty: req.body.difficulty,
       steps: req.body.steps ?? [],
       optional_additions: req.body.optional_additions ?? [],
     });
+
+    const io = req.app.get("io");
+    if (io) {
+      io.to(userId).emit("notification", {
+        type: "recipe_saved",
+        message: `Recipe saved: ${saved.title}`,
+        recipeId: saved._id.toString()
+      });
+    }
 
     return res.status(201).json(saved);
   } catch (err) {
@@ -194,6 +200,16 @@ app.delete("/api/recipes/:id", auth, async (req, res) => {
     if (!deleted) {
       return res.status(404).json({ error: "Recipe not found" });
     }
+
+    const io = req.app.get("io");
+    if (io) {
+      io.to(userId).emit("notification", {
+        type: "recipe_deleted",
+        message: "Recipe deleted",
+        recipeId: id
+      });
+    }
+
     return res.json({ ok: true });
   } catch (err) {
     return res
