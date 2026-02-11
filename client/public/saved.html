@@ -3,47 +3,39 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Recipe AI - Saved Recipes</title>
+    <title>Saved Recipes</title>
     <link rel="stylesheet" href="/src/css/style.css" />
-    <link rel="stylesheet" href="/src/css/saved.css" />
   </head>
 
   <body>
-    <header class="topbar" aria-label="Top navigation">
-      <div class="topbar__inner">
-        <div class="brand">Recipe AI</div>
-        <nav class="topbar__nav">
-          <a class="topbar__link" href="/public/dashboard.html">Dashboard</a>
-          <a class="topbar__link" href="#" id="logoutBtn">Log Out</a>
-        </nav>
+    <header class="topbar">
+      <div class="brand">
+        <span class="logo">🍳</span>
+        <span>Recipe AI</span>
       </div>
+
+      <nav class="nav">
+        <a href="/public/dashboard.html" class="nav-link">Dashboard</a>
+        <a href="#" id="logoutLink" class="nav-link">Logout</a>
+      </nav>
     </header>
 
-    <main class="savedShell">
-      <div class="savedTopRow">
-        <a class="savedBack" href="/public/dashboard.html">
-          ← <span>Back</span>
-        </a>
-        <h1 class="savedTitle">Saved Recipes</h1>
-      </div>
+    <main class="page">
+      <section class="card">
+        <h1>Saved Recipes</h1>
+        <p id="status" class="status"></p>
 
-      <div id="status" class="statusMount" aria-live="polite"></div>
-
-      <section id="emptyState" class="emptyBox">
-        <div>
-          <p class="emptyMain">No saved recipes yet.</p>
-          <p class="emptySub">
-            Save recipes from the results page to see them here.
-          </p>
-          <a class="btnBlue" href="/public/dashboard.html">Find Recipes</a>
+        <div id="emptyState" class="muted" style="display: none">
+          No saved recipes yet.
         </div>
-      </section>
 
-      <section id="savedSection" class="savedGridWrap" hidden>
-        <div id="savedGrid" class="recipe-grid"></div>
+        <section id="savedSection" style="display: none">
+          <div id="savedGrid" class="recipe-grid"></div>
+        </section>
       </section>
     </main>
 <script src="/public/saved-logic.js"></script>
+<script src="/public/realtime.js"></script>
 
   </body>
 </html>
