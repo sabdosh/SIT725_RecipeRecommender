@@ -1,8 +1,10 @@
 // server/services/gemini.service.js
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
 const GEMINI_MODEL = process.env.GEMINI_MODEL || "gemini-2.5-flash";
+const GEMINI_STUB = process.env.GEMINI_STUB === "1";
 
 function assertConfigured() {
+  if (GEMINI_STUB) return;
   if (!GEMINI_API_KEY) {
     const err = new Error("GEMINI_API_KEY is missing in .env");
     err.statusCode = 500;
@@ -13,10 +15,8 @@ function assertConfigured() {
 function extractJsonCandidate(text) {
   if (!text) return "";
 
-  // Remove markdown fences
   let s = text.replace(/```json/gi, "```").replace(/```/g, "").trim();
 
-  // Find first { or [ and last matching } or ]
   const firstObj = s.indexOf("{");
   const firstArr = s.indexOf("[");
   let first = -1;
@@ -32,12 +32,8 @@ function extractJsonCandidate(text) {
     s = s.slice(first, last + 1).trim();
   }
 
-  // Basic cleanup: smart quotes → normal quotes
-  s = s
-    .replace(/[“”]/g, '"')
-    .replace(/[‘’]/g, "'");
+  s = s.replace(/[“”]/g, '"').replace(/[‘’]/g, "'");
 
-  // Remove trailing commas before } or ]
   s = s.replace(/,\s*([}\]])/g, "$1");
 
   return s;
@@ -95,7 +91,22 @@ async function generateRecipeSuggestions({ ingredients }) {
     throw err;
   }
 
-  // Primary prompt (strict)
+  if (GEMINI_STUB) {
+    return {
+      recipes: [
+        {
+          title: "Chicken Rice Bowl",
+          why_it_fits: "Uses chicken and rice",
+          missing_ingredients: ["soy sauce"],
+          estimated_time_minutes: 25,
+          difficulty: "Easy",
+          steps: ["Cook rice", "Cook chicken", "Assemble bowl"],
+          optional_additions: ["scallions"]
+        }
+      ]
+    };
+  }
+
   const prompt = `
 Return ONLY valid JSON. No markdown. No commentary. No code fences.
 
@@ -125,16 +136,12 @@ Rules:
 
   const raw1 = await callGemini(prompt, { temperature: 0.4, maxOutputTokens: 1400 });
 
-  // Attempt parse #1 (with extraction/cleanup)
   const candidate1 = extractJsonCandidate(raw1);
   try {
     const parsed = JSON.parse(candidate1 || raw1);
     if (parsed && Array.isArray(parsed.recipes)) return parsed;
-  } catch (e) {
-    // fall through to repair pass
-  }
+  } catch (e) {}
 
-  // Repair pass: ask Gemini to convert raw output into valid JSON for schema
   const repairPrompt = `
 You are a formatter. Convert the following into VALID JSON that matches this schema exactly.
 Return ONLY JSON. No markdown. No extra text.
@@ -165,10 +172,6 @@ ${raw1}
     const parsed2 = JSON.parse(candidate2 || raw2);
     if (parsed2 && Array.isArray(parsed2.recipes)) return parsed2;
   } catch (e) {
-    // TEMP DEBUG: uncomment to see what Gemini returned
-    // console.log("RAW1:\n", raw1);
-    // console.log("RAW2:\n", raw2);
-
     const err = new Error("Gemini returned non-JSON output. Try again.");
     err.statusCode = 502;
     throw err;
