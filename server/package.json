@@ -4,8 +4,9 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "jest --runInBand",
-    "start": "node server.js"
+  "test": "jest --runInBand",
+  "test:e2e": "playwright test",
+  "test:all": "npm test && npm run test:e2e"
   },
   "keywords": [],
   "author": "",
